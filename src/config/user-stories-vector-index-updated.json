@@ -1,0 +1,83 @@
+{
+  "fields": [
+    {
+      "type": "vector",
+      "path": "embedding",
+      "numDimensions": 1024,
+      "similarity": "cosine"
+    },
+    {
+      "type": "filter",
+      "path": "key"
+    },
+    {
+      "type": "filter",
+      "path": "status"
+    },
+    {
+      "type": "filter",
+      "path": "priority"
+    },
+    {
+      "type": "filter",
+      "path": "assignee"
+    },
+    {
+      "type": "filter",
+      "path": "reporter"
+    },
+    {
+      "type": "filter",
+      "path": "project"
+    },
+    {
+      "type": "filter",
+      "path": "epic"
+    },
+    {
+      "type": "filter",
+      "path": "components"
+    },
+    {
+      "type": "filter",
+      "path": "labels"
+    },
+    {
+      "type": "filter",
+      "path": "fixVersions"
+    },
+    {
+      "type": "filter",
+      "path": "storyPoints"
+    },
+    {
+      "type": "filter",
+      "path": "risk"
+    },
+    {
+      "type": "filter",
+      "path": "sprint"
+    },
+    {
+      "type": "filter",
+      "path": "team"
+    },
+    {
+      "type": "filter",
+      "path": "sourceType"
+    },
+    {
+      "type": "filter",
+      "path": "created"
+    },
+    {
+      "type": "filter",
+      "path": "updated"
+    },
+    {
+      "type": "filter",
+      "path": "importedAt"
+    }
+  ]
+}
+

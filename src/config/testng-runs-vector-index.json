@@ -1,0 +1,38 @@
+{
+  "fields": [
+    {
+      "type": "vector",
+      "path": "embedding",
+      "numDimensions": 1024,
+      "similarity": "cosine"
+    },
+    {
+      "type": "filter",
+      "path": "text"
+    },
+    {
+      "type": "filter",
+      "path": "suite_name"
+    },
+    {
+      "type": "filter",
+      "path": "test_name"
+    },
+    {
+      "type": "filter",
+      "path": "status"
+    },
+    {
+      "type": "filter",
+      "path": "duration_ms"
+    },
+    {
+      "type": "filter",
+      "path": "execution_time"
+    },
+    {
+      "type": "filter",
+      "path": "error_message"
+    }
+  ]
+}

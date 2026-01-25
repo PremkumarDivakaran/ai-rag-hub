@@ -1,0 +1,34 @@
+{
+  "fields": [
+    {
+      "type": "vector",
+      "path": "embedding",
+      "numDimensions": 1536,
+      "similarity": "cosine"
+    },
+    {
+      "type": "filter",
+      "path": "title"
+    },
+    {
+      "type": "filter",
+      "path": "content"
+    },
+    {
+      "type": "filter",
+      "path": "link"
+    },
+    {
+      "type": "filter",
+      "path": "children"
+    },
+    {
+      "type": "filter",
+      "path": "pageType"
+    },
+    {
+      "type": "filter",
+      "path": "hasChildren"
+    }
+  ]
+}

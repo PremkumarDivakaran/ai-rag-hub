@@ -1,0 +1,101 @@
+run_id,suite_name,test_name,status,duration_ms,execution_time,error_message
+RUN_20251001_1191,Suite_LoginTest_20251001,LoginTest,PASS,3700,2025-10-01T10:00:00,
+RUN_20251001_5565,Suite_RemoveItemFromCartTest_20251001,RemoveItemFromCartTest,PASS,1243,2025-10-01T10:00:00,
+RUN_20251001_3105,Suite_ApplyCouponTest_20251001,ApplyCouponTest,PASS,3725,2025-10-01T10:00:00,
+RUN_20251001_5056,Suite_LogoutTest_20251001,LogoutTest,PASS,4192,2025-10-01T10:00:00,
+RUN_20251001_4816,Suite_WishlistTest_20251001,WishlistTest,PASS,3863,2025-10-01T10:00:00,
+RUN_20251001_5228,Suite_CheckoutPaymentTest_20251001,CheckoutPaymentTest,PASS,4665,2025-10-01T10:00:00,
+RUN_20251001_5740,Suite_OrderHistoryTest_20251001,OrderHistoryTest,FAIL,4963,2025-10-01T10:00:00,OrderHistoryTest failed due to unexpected behavior
+RUN_20251001_1059,Suite_AddItemToCartTest_20251001,AddItemToCartTest,PASS,2748,2025-10-01T10:00:00,
+RUN_20251001_1561,Suite_SearchProductTest_20251001,SearchProductTest,PASS,2512,2025-10-01T10:00:00,
+RUN_20251001_5362,Suite_ProfileUpdateTest_20251001,ProfileUpdateTest,PASS,2547,2025-10-01T10:00:00,
+RUN_20251002_1452,Suite_LoginTest_20251002,LoginTest,PASS,2907,2025-10-02T10:00:00,
+RUN_20251002_6896,Suite_RemoveItemFromCartTest_20251002,RemoveItemFromCartTest,PASS,3722,2025-10-02T10:00:00,
+RUN_20251002_1020,Suite_ApplyCouponTest_20251002,ApplyCouponTest,PASS,4747,2025-10-02T10:00:00,
+RUN_20251002_6273,Suite_LogoutTest_20251002,LogoutTest,PASS,2091,2025-10-02T10:00:00,
+RUN_20251002_4006,Suite_WishlistTest_20251002,WishlistTest,PASS,1833,2025-10-02T10:00:00,
+RUN_20251002_3802,Suite_CheckoutPaymentTest_20251002,CheckoutPaymentTest,PASS,1719,2025-10-02T10:00:00,
+RUN_20251002_5816,Suite_OrderHistoryTest_20251002,OrderHistoryTest,FAIL,4858,2025-10-02T10:00:00,OrderHistoryTest failed due to unexpected behavior
+RUN_20251002_3809,Suite_AddItemToCartTest_20251002,AddItemToCartTest,FAIL,4666,2025-10-02T10:00:00,AddItemToCartTest failed due to unexpected behavior
+RUN_20251002_8268,Suite_SearchProductTest_20251002,SearchProductTest,FAIL,980,2025-10-02T10:00:00,SearchProductTest failed due to unexpected behavior
+RUN_20251002_1872,Suite_ProfileUpdateTest_20251002,ProfileUpdateTest,PASS,2854,2025-10-02T10:00:00,
+RUN_20251003_5708,Suite_LoginTest_20251003,LoginTest,PASS,4655,2025-10-03T10:00:00,
+RUN_20251003_5091,Suite_RemoveItemFromCartTest_20251003,RemoveItemFromCartTest,PASS,502,2025-10-03T10:00:00,
+RUN_20251003_4020,Suite_ApplyCouponTest_20251003,ApplyCouponTest,PASS,3845,2025-10-03T10:00:00,
+RUN_20251003_2727,Suite_LogoutTest_20251003,LogoutTest,PASS,4934,2025-10-03T10:00:00,
+RUN_20251003_5681,Suite_WishlistTest_20251003,WishlistTest,PASS,1211,2025-10-03T10:00:00,
+RUN_20251003_3697,Suite_CheckoutPaymentTest_20251003,CheckoutPaymentTest,PASS,3404,2025-10-03T10:00:00,
+RUN_20251003_4087,Suite_OrderHistoryTest_20251003,OrderHistoryTest,FAIL,4702,2025-10-03T10:00:00,OrderHistoryTest failed due to unexpected behavior
+RUN_20251003_7973,Suite_AddItemToCartTest_20251003,AddItemToCartTest,PASS,4528,2025-10-03T10:00:00,
+RUN_20251003_6090,Suite_SearchProductTest_20251003,SearchProductTest,PASS,3450,2025-10-03T10:00:00,
+RUN_20251003_6342,Suite_ProfileUpdateTest_20251003,ProfileUpdateTest,PASS,4849,2025-10-03T10:00:00,
+RUN_20251004_5327,Suite_LoginTest_20251004,LoginTest,PASS,3662,2025-10-04T10:00:00,
+RUN_20251004_4156,Suite_RemoveItemFromCartTest_20251004,RemoveItemFromCartTest,PASS,3189,2025-10-04T10:00:00,
+RUN_20251004_9011,Suite_ApplyCouponTest_20251004,ApplyCouponTest,PASS,4341,2025-10-04T10:00:00,
+RUN_20251004_8303,Suite_LogoutTest_20251004,LogoutTest,PASS,586,2025-10-04T10:00:00,
+RUN_20251004_7894,Suite_WishlistTest_20251004,WishlistTest,PASS,4051,2025-10-04T10:00:00,
+RUN_20251004_1471,Suite_CheckoutPaymentTest_20251004,CheckoutPaymentTest,PASS,1017,2025-10-04T10:00:00,
+RUN_20251004_6068,Suite_OrderHistoryTest_20251004,OrderHistoryTest,FAIL,2549,2025-10-04T10:00:00,OrderHistoryTest failed due to unexpected behavior
+RUN_20251004_4539,Suite_AddItemToCartTest_20251004,AddItemToCartTest,PASS,4492,2025-10-04T10:00:00,
+RUN_20251004_6708,Suite_SearchProductTest_20251004,SearchProductTest,FAIL,4014,2025-10-04T10:00:00,SearchProductTest failed due to unexpected behavior
+RUN_20251004_4601,Suite_ProfileUpdateTest_20251004,ProfileUpdateTest,PASS,3870,2025-10-04T10:00:00,
+RUN_20251005_8552,Suite_LoginTest_20251005,LoginTest,PASS,1305,2025-10-05T10:00:00,
+RUN_20251005_4206,Suite_RemoveItemFromCartTest_20251005,RemoveItemFromCartTest,PASS,1963,2025-10-05T10:00:00,
+RUN_20251005_9113,Suite_ApplyCouponTest_20251005,ApplyCouponTest,PASS,639,2025-10-05T10:00:00,
+RUN_20251005_5914,Suite_LogoutTest_20251005,LogoutTest,PASS,4025,2025-10-05T10:00:00,
+RUN_20251005_1465,Suite_WishlistTest_20251005,WishlistTest,PASS,4228,2025-10-05T10:00:00,
+RUN_20251005_6269,Suite_CheckoutPaymentTest_20251005,CheckoutPaymentTest,PASS,1199,2025-10-05T10:00:00,
+RUN_20251005_2278,Suite_OrderHistoryTest_20251005,OrderHistoryTest,FAIL,2734,2025-10-05T10:00:00,OrderHistoryTest failed due to unexpected behavior
+RUN_20251005_5071,Suite_AddItemToCartTest_20251005,AddItemToCartTest,FAIL,1320,2025-10-05T10:00:00,AddItemToCartTest failed due to unexpected behavior
+RUN_20251005_6276,Suite_SearchProductTest_20251005,SearchProductTest,PASS,4743,2025-10-05T10:00:00,
+RUN_20251005_1011,Suite_ProfileUpdateTest_20251005,ProfileUpdateTest,PASS,4777,2025-10-05T10:00:00,
+RUN_20251006_1449,Suite_LoginTest_20251006,LoginTest,PASS,4009,2025-10-06T10:00:00,
+RUN_20251006_8096,Suite_RemoveItemFromCartTest_20251006,RemoveItemFromCartTest,PASS,3973,2025-10-06T10:00:00,
+RUN_20251006_1621,Suite_ApplyCouponTest_20251006,ApplyCouponTest,PASS,2382,2025-10-06T10:00:00,
+RUN_20251006_3481,Suite_LogoutTest_20251006,LogoutTest,PASS,2236,2025-10-06T10:00:00,
+RUN_20251006_4730,Suite_WishlistTest_20251006,WishlistTest,PASS,4843,2025-10-06T10:00:00,
+RUN_20251006_2600,Suite_CheckoutPaymentTest_20251006,CheckoutPaymentTest,PASS,1807,2025-10-06T10:00:00,
+RUN_20251006_7188,Suite_OrderHistoryTest_20251006,OrderHistoryTest,FAIL,790,2025-10-06T10:00:00,OrderHistoryTest failed due to unexpected behavior
+RUN_20251006_4534,Suite_AddItemToCartTest_20251006,AddItemToCartTest,PASS,2154,2025-10-06T10:00:00,
+RUN_20251006_4377,Suite_SearchProductTest_20251006,SearchProductTest,FAIL,4163,2025-10-06T10:00:00,SearchProductTest failed due to unexpected behavior
+RUN_20251006_9021,Suite_ProfileUpdateTest_20251006,ProfileUpdateTest,PASS,3851,2025-10-06T10:00:00,
+RUN_20251007_4864,Suite_LoginTest_20251007,LoginTest,PASS,2560,2025-10-07T10:00:00,
+RUN_20251007_8861,Suite_RemoveItemFromCartTest_20251007,RemoveItemFromCartTest,PASS,2275,2025-10-07T10:00:00,
+RUN_20251007_1864,Suite_ApplyCouponTest_20251007,ApplyCouponTest,PASS,1946,2025-10-07T10:00:00,
+RUN_20251007_8745,Suite_LogoutTest_20251007,LogoutTest,PASS,3007,2025-10-07T10:00:00,
+RUN_20251007_1822,Suite_WishlistTest_20251007,WishlistTest,PASS,985,2025-10-07T10:00:00,
+RUN_20251007_7692,Suite_CheckoutPaymentTest_20251007,CheckoutPaymentTest,PASS,4096,2025-10-07T10:00:00,
+RUN_20251007_6384,Suite_OrderHistoryTest_20251007,OrderHistoryTest,FAIL,3102,2025-10-07T10:00:00,OrderHistoryTest failed due to unexpected behavior
+RUN_20251007_6964,Suite_AddItemToCartTest_20251007,AddItemToCartTest,FAIL,3368,2025-10-07T10:00:00,AddItemToCartTest failed due to unexpected behavior
+RUN_20251007_3292,Suite_SearchProductTest_20251007,SearchProductTest,FAIL,4086,2025-10-07T10:00:00,SearchProductTest failed due to unexpected behavior
+RUN_20251007_4449,Suite_ProfileUpdateTest_20251007,ProfileUpdateTest,FAIL,4991,2025-10-07T10:00:00,ProfileUpdateTest failed due to unexpected behavior
+RUN_20251008_2097,Suite_LoginTest_20251008,LoginTest,PASS,2885,2025-10-08T10:00:00,
+RUN_20251008_7350,Suite_RemoveItemFromCartTest_20251008,RemoveItemFromCartTest,PASS,3591,2025-10-08T10:00:00,
+RUN_20251008_5387,Suite_ApplyCouponTest_20251008,ApplyCouponTest,PASS,1079,2025-10-08T10:00:00,
+RUN_20251008_2904,Suite_LogoutTest_20251008,LogoutTest,PASS,951,2025-10-08T10:00:00,
+RUN_20251008_5424,Suite_WishlistTest_20251008,WishlistTest,PASS,3471,2025-10-08T10:00:00,
+RUN_20251008_1011,Suite_CheckoutPaymentTest_20251008,CheckoutPaymentTest,PASS,2091,2025-10-08T10:00:00,
+RUN_20251008_5478,Suite_OrderHistoryTest_20251008,OrderHistoryTest,FAIL,2365,2025-10-08T10:00:00,OrderHistoryTest failed due to unexpected behavior
+RUN_20251008_3959,Suite_AddItemToCartTest_20251008,AddItemToCartTest,PASS,2860,2025-10-08T10:00:00,
+RUN_20251008_4135,Suite_SearchProductTest_20251008,SearchProductTest,PASS,1369,2025-10-08T10:00:00,
+RUN_20251008_8166,Suite_ProfileUpdateTest_20251008,ProfileUpdateTest,PASS,3674,2025-10-08T10:00:00,
+RUN_20251009_2953,Suite_LoginTest_20251009,LoginTest,PASS,3218,2025-10-09T10:00:00,
+RUN_20251009_7566,Suite_RemoveItemFromCartTest_20251009,RemoveItemFromCartTest,PASS,4738,2025-10-09T10:00:00,
+RUN_20251009_6091,Suite_ApplyCouponTest_20251009,ApplyCouponTest,PASS,1582,2025-10-09T10:00:00,
+RUN_20251009_6329,Suite_LogoutTest_20251009,LogoutTest,PASS,3445,2025-10-09T10:00:00,
+RUN_20251009_8528,Suite_WishlistTest_20251009,WishlistTest,PASS,1365,2025-10-09T10:00:00,
+RUN_20251009_8762,Suite_CheckoutPaymentTest_20251009,CheckoutPaymentTest,PASS,4730,2025-10-09T10:00:00,
+RUN_20251009_9222,Suite_OrderHistoryTest_20251009,OrderHistoryTest,FAIL,996,2025-10-09T10:00:00,OrderHistoryTest failed due to unexpected behavior
+RUN_20251009_8060,Suite_AddItemToCartTest_20251009,AddItemToCartTest,PASS,1379,2025-10-09T10:00:00,
+RUN_20251009_7181,Suite_SearchProductTest_20251009,SearchProductTest,FAIL,1981,2025-10-09T10:00:00,SearchProductTest failed due to unexpected behavior
+RUN_20251009_1969,Suite_ProfileUpdateTest_20251009,ProfileUpdateTest,PASS,2174,2025-10-09T10:00:00,
+RUN_20251010_9707,Suite_LoginTest_20251010,LoginTest,PASS,3113,2025-10-10T10:00:00,
+RUN_20251010_7282,Suite_RemoveItemFromCartTest_20251010,RemoveItemFromCartTest,PASS,3495,2025-10-10T10:00:00,
+RUN_20251010_5644,Suite_ApplyCouponTest_20251010,ApplyCouponTest,PASS,4595,2025-10-10T10:00:00,
+RUN_20251010_9773,Suite_LogoutTest_20251010,LogoutTest,PASS,4895,2025-10-10T10:00:00,
+RUN_20251010_4413,Suite_WishlistTest_20251010,WishlistTest,PASS,4054,2025-10-10T10:00:00,
+RUN_20251010_6738,Suite_CheckoutPaymentTest_20251010,CheckoutPaymentTest,PASS,2118,2025-10-10T10:00:00,
+RUN_20251010_5981,Suite_OrderHistoryTest_20251010,OrderHistoryTest,FAIL,1495,2025-10-10T10:00:00,OrderHistoryTest failed due to unexpected behavior
+RUN_20251010_6379,Suite_AddItemToCartTest_20251010,AddItemToCartTest,PASS,2354,2025-10-10T10:00:00,
+RUN_20251010_6727,Suite_SearchProductTest_20251010,SearchProductTest,PASS,2333,2025-10-10T10:00:00,
+RUN_20251010_3276,Suite_ProfileUpdateTest_20251010,ProfileUpdateTest,PASS,1388,2025-10-10T10:00:00,
