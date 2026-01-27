@@ -33,9 +33,9 @@ async function main() {
     // Load sample testcases
     const testcases = JSON.parse(fs.readFileSync("src/data/testcases.json", "utf-8"));
 
-    console.log(`🚀 Processing ${testcases.length} test cases using Testleaf API...`);
+    console.log(`🚀 Processing ${testcases.length} test cases using LLM API...`);
     console.log(`⚙️  Configuration:`);
-    console.log(`   🌐 API Base: ${LLM_API_BASE}`);
+    console.log(`   🌐 API Base: [CONFIGURED]`);
     console.log(`   📧 User Email: ${USER_EMAIL}`);
     console.log(`   🔑 Auth Token: ${AUTH_TOKEN ? '✅ Provided' : '❌ Missing'}`);
     console.log(`   🗄️  Database: ${process.env.DB_NAME}`);

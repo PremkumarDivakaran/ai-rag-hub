@@ -25,7 +25,7 @@ async function main() {
     const query = process.argv[2] || "login tests";
 
     console.log(`🔎 Searching for: "${query}"`);
-    console.log(`🔄 Getting embedding from Testleaf API...`);
+    console.log(`🔄 Getting embedding from LLM API...`);
 
     // Generate embedding using Testleaf API
     const embeddingResponse = await axios.post(

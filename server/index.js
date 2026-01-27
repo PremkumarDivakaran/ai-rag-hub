@@ -672,7 +672,7 @@ const CONCURRENT_LIMIT = 5;       // Max concurrent embedding API calls
 const TARGET_COLLECTION = "${collectionToUse}";
 
 console.log('🔧 Batch Embedding Script Config:');
-console.log('   API Base:', LLM_API_BASE);
+console.log('   API Base: [CONFIGURED]');
 console.log('   User Email:', USER_EMAIL);
 console.log('   Collection:', TARGET_COLLECTION);
 console.log('   Embedding Batch Size:', EMBEDDING_BATCH_SIZE);
@@ -1207,8 +1207,8 @@ Keep it under 300 words.`
       : `Summarize these test cases:\n\n${resultsText}`;
 
     // Use Testleaf API for chat completion
-    console.log('🔧 Testleaf API Config Check:');
-    console.log('   API Base:', LLM_API_BASE);
+    console.log('🔧 LLM API Config Check:');
+    console.log('   API Base: [CONFIGURED]');
     console.log('   User Email:', USER_EMAIL);
     console.log('   Auth Token:', AUTH_TOKEN ? `${AUTH_TOKEN.substring(0, 5)}...` : 'NOT SET');
     
@@ -1218,7 +1218,7 @@ Keep it under 300 words.`
     
     // Use Testleaf chat completions endpoint
     const apiUrl = `${LLM_API_BASE}/v1/chat/completions`;
-    console.log('🌐 Making request to:', apiUrl);
+    console.log('🌐 Making LLM API request...');
 
     const response = await axios.post(apiUrl, {
       model: 'gpt-4o-mini',
@@ -1236,7 +1236,7 @@ Keep it under 300 words.`
     });
 
     // Log the response for debugging
-    console.log('Testleaf API Response:', JSON.stringify(response.data, null, 2));
+    console.log('LLM API Response received');
 
     // Check if response has expected structure (Testleaf API transaction response)
     if (!response.data || !response.data.transaction || !response.data.transaction.response) {
@@ -1416,8 +1416,8 @@ ${index + 1}. **${story.id}**: ${story.title}
     }
 
     // Use Testleaf API for chat completion
-    console.log('🔧 Testleaf API Config Check (RAG-Enhanced Prompt):');
-    console.log('   API Base:', LLM_API_BASE);
+    console.log('🔧 LLM API Config Check (RAG-Enhanced Prompt):');
+    console.log('   API Base: [CONFIGURED]');
     console.log('   User Email:', USER_EMAIL);
     console.log('   Auth Token:', AUTH_TOKEN ? `${AUTH_TOKEN.substring(0, 5)}...` : 'NOT SET');
     console.log('   RAG Enabled:', enableRAG);
@@ -1429,7 +1429,7 @@ ${index + 1}. **${story.id}**: ${story.title}
     }
     
     const apiUrl = `${LLM_API_BASE}/v1/chat/completions`;
-    console.log('🌐 Making request to:', apiUrl);
+    console.log('🌐 Making LLM API request...');
 
     const requestData = {
       model: 'gpt-4o-mini',
@@ -1536,11 +1536,14 @@ app.post('/api/search', async (req, res) => {
 
     await mongoClient.connect();
     
-    // Select collection and index based on useConfluence flag
+    // Select collection and index based on flags
     let collectionName, vectorIndexName;
-    if (useConfluence) {
+    if (req.body.useConfluence) {
       collectionName = process.env.CONFLUENCE_COLLECTION_NAME || 'confluence_data';
       vectorIndexName = process.env.CONFLUENCE_VECTOR_INDEX_NAME || 'confluence_vector_index';
+    } else if (req.body.useDefects) {
+      collectionName = process.env.DEFECT_COLLECTION_NAME || 'defect_collection';
+      vectorIndexName = process.env.DEFECT_VECTOR_INDEX_NAME || 'vector_index_defect';
     } else {
       collectionName = process.env.COLLECTION_NAME;
       vectorIndexName = process.env.VECTOR_INDEX_NAME;
@@ -1744,6 +1747,11 @@ app.post('/api/search/hybrid', async (req, res) => {
       collectionName = process.env.CONFLUENCE_COLLECTION_NAME || 'confluence_data';
       bm25IndexName = process.env.CONFLUENCE_BM25_INDEX_NAME || 'confluence_bm25_index';
       vectorIndexName = process.env.CONFLUENCE_VECTOR_INDEX_NAME || 'confluence_vector_index';
+    } else if (req.body.useDefects) {
+      // Defects collection
+      collectionName = process.env.DEFECT_COLLECTION_NAME || 'defect_collection';
+      bm25IndexName = process.env.DEFECT_BM25_INDEX_NAME || 'defect_bm25_index';
+      vectorIndexName = process.env.DEFECT_VECTOR_INDEX_NAME || 'vector_index_defect';
     } else if (useUserStories) {
       // User stories
       collectionName = process.env.USER_STORIES_COLLECTION_NAME;
@@ -2069,6 +2077,11 @@ app.post('/api/search/rerank', async (req, res) => {
       collectionName = process.env.CONFLUENCE_COLLECTION_NAME || 'confluence_data';
       bm25IndexName = process.env.CONFLUENCE_BM25_INDEX_NAME || 'confluence_bm25_index';
       vectorIndexName = process.env.CONFLUENCE_VECTOR_INDEX_NAME || 'confluence_vector_index';
+    } else if (req.body.useDefects) {
+      // Defects collection
+      collectionName = process.env.DEFECT_COLLECTION_NAME || 'defect_collection';
+      bm25IndexName = process.env.DEFECT_BM25_INDEX_NAME || 'defect_bm25_index';
+      vectorIndexName = process.env.DEFECT_VECTOR_INDEX_NAME || 'vector_index_defect';
     } else if (useUserStories) {
       // User stories
       collectionName = process.env.USER_STORIES_COLLECTION_NAME;
@@ -2526,7 +2539,7 @@ Keep it under 400 words and focus on actionable insights for story assessment.`;
 
     const userPrompt = `Analyze these ${userStories.length} similar user stories${userStoryContext ? ` for the context: ${userStoryContext}` : ''}. Identify patterns, themes, and insights:\n\n${storiesText}`;
 
-    console.log('🌐 Making Testleaf API request for user story summarization');
+    console.log('🌐 Making LLM API request for user story summarization');
 
     // Use Testleaf API for chat completion
     if (!LLM_API_BASE || !USER_EMAIL || !AUTH_TOKEN) {
@@ -2549,7 +2562,7 @@ Keep it under 400 words and focus on actionable insights for story assessment.`;
       }
     });
 
-    console.log('📊 Testleaf API Response received');
+    console.log('📊 LLM API Response received');
 
     // Check response structure
     if (!response.data || !response.data.transaction || !response.data.transaction.response) {
@@ -2754,7 +2767,7 @@ ${similarStories && similarStories.length > 0 ? 'Use the similar stories above a
 
 Return only valid JSON.`;
 
-    console.log('🌐 Making Testleaf API request for user story rating');
+    console.log('🌐 Making LLM API request for user story rating');
 
     const response = await axios.post(`${LLM_API_BASE}/v1/chat/completions`, {
       model: 'gpt-4o-mini',
@@ -2849,7 +2862,7 @@ Return only valid JSON.`;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
   console.log(`📋 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🌐 API Base: ${LLM_API_BASE}`);
+  console.log(`🌐 API Base: [CONFIGURED]`);
   console.log(`👤 User Email: ${USER_EMAIL || 'NOT SET'}`);
   console.log(`🔑 Auth Token: ${AUTH_TOKEN ? 'SET' : 'NOT SET'}`);
 });

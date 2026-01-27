@@ -47,9 +47,9 @@ async function main() {
       pageType: page.pageType || (page.hasChildren ? 'parent' : 'leaf')
     }));
 
-    console.log(`🚀 Processing ${processedPages.length} confluence pages using Testleaf API...`);
+    console.log(`🚀 Processing ${processedPages.length} confluence pages using LLM API...`);
     console.log(`⚙️  Configuration:`);
-    console.log(`   🌐 API Base: ${LLM_API_BASE}`);
+    console.log(`   🌐 API Base: [CONFIGURED]`);
     console.log(`   📧 User Email: ${USER_EMAIL}`);
     console.log(`   🔑 Auth Token: ${AUTH_TOKEN ? '✅ Provided' : '❌ Missing'}`);
     console.log(`   🗄️  Database: ${process.env.DB_NAME}`);

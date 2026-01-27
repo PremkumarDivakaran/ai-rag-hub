@@ -1,0 +1,83 @@
+{
+  "mappings": {
+    "dynamic": false,
+    "fields": {
+      "bug_id": {
+        "type": "string",
+        "analyzer": "lucene.keyword"
+      },
+      "summary": {
+        "type": "string",
+        "analyzer": "lucene.standard"
+      },
+      "description": {
+        "type": "string",
+        "analyzer": "lucene.standard"
+      },
+      "steps_to_reproduce": {
+        "type": "string",
+        "analyzer": "lucene.standard"
+      },
+      "expected_result": {
+        "type": "string",
+        "analyzer": "lucene.standard"
+      },
+      "actual_result": {
+        "type": "string",
+        "analyzer": "lucene.standard"
+      },
+      "service": {
+        "type": "string",
+        "analyzer": "lucene.keyword"
+      },
+      "module": {
+        "type": "string",
+        "analyzer": "lucene.keyword"
+      },
+      "environment": {
+        "type": "string",
+        "analyzer": "lucene.keyword"
+      },
+      "error_signature": {
+        "type": "string",
+        "analyzer": "lucene.standard"
+      },
+      "status": {
+        "type": "string",
+        "analyzer": "lucene.keyword"
+      },
+      "priority": {
+        "type": "string",
+        "analyzer": "lucene.keyword"
+      },
+      "rca": {
+        "type": "string",
+        "analyzer": "lucene.standard"
+      },
+      "fix_summary": {
+        "type": "string",
+        "analyzer": "lucene.standard"
+      },
+      "resolution_comments": {
+        "type": "string",
+        "analyzer": "lucene.standard"
+      },
+      "created_date": {
+        "type": "string",
+        "analyzer": "lucene.keyword"
+      },
+      "resolved_date": {
+        "type": "string",
+        "analyzer": "lucene.keyword"
+      },
+      "labels": {
+        "type": "string",
+        "analyzer": "lucene.keyword"
+      },
+      "duplicate_of": {
+        "type": "string",
+        "analyzer": "lucene.keyword"
+      }
+    }
+  }
+}

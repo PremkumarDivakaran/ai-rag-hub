@@ -134,7 +134,7 @@ async function searchCombined(query, options = {}) {
     const db = client.db(process.env.DB_NAME);
 
     console.log(`🔎 Searching for: "${query}"`);
-    console.log(`🔄 Getting embedding from testleaf API...`);
+    console.log(`🔄 Getting embedding from LLM API...`);
 
     // Generate embedding for the search query
     const embeddingResult = await generateQueryEmbedding(query);
@@ -191,7 +191,7 @@ async function searchWithBreakdown(query, options = {}) {
     const db = client.db(process.env.DB_NAME);
 
     console.log(`🔎 Searching for: "${query}"`);
-    console.log(`🔄 Getting embedding from testleaf API...`);
+    console.log(`🔄 Getting embedding from LLM API...`);
 
     // Generate embedding for the search query
     const embeddingResult = await generateQueryEmbedding(query);

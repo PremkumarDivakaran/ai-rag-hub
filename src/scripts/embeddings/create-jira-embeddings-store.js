@@ -71,9 +71,9 @@ async function main() {
     const jiraData =  JSON.parse(fs.readFileSync("src/data/jira-user-stories.json", "utf-8"));
     const userStories = jiraData.userStories;
 
-    console.log(`🚀 Processing ${userStories.length} Jira user stories using Testleaf API...`);
+    console.log(`🚀 Processing ${userStories.length} Jira user stories using LLM API...`);
     console.log(`⚙️  Configuration:`);
-    console.log(`   🌐 API Base: ${LLM_API_BASE}`);
+    console.log(`   🌐 API Base: [CONFIGURED]`);
     console.log(`   📧 User Email: ${USER_EMAIL}`);
     console.log(`   🔑 Auth Token: ${AUTH_TOKEN ? '✅ Provided' : '❌ Missing'}`);
     console.log(`   🗄️  Database: ${process.env.DB_NAME}`);

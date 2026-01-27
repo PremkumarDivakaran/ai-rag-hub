@@ -88,9 +88,9 @@ async function main() {
     // Load user stories
     const userStories = JSON.parse(fs.readFileSync(USER_STORIES_DATA_FILE, "utf-8"));
 
-    console.log(`🚀 Processing ${userStories.length} user stories using Testleaf API...`);
+    console.log(`🚀 Processing ${userStories.length} user stories using LLM API...`);
     console.log(`⚙️  Configuration:`);
-    console.log(`   🌐 API Base: ${LLM_API_BASE}`);
+    console.log(`   🌐 API Base: [CONFIGURED]`);
     console.log(`   📧 User Email: ${USER_EMAIL}`);
     console.log(`   🔑 Auth Token: ${AUTH_TOKEN ? '✅ Provided' : '❌ Missing'}`);
     console.log(`   🗄️  Database: ${process.env.DB_NAME}`);

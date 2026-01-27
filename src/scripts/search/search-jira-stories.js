@@ -63,7 +63,7 @@ async function searchUserStories(query, options = {}) {
     const collection = db.collection(process.env.USER_STORIES_COLLECTION_NAME);
 
     console.log(`� Searching for: "${query}"`);
-    console.log(`� Getting embedding from testleaf API...`);
+    console.log(`🔄 Getting embedding from LLM API...`);
 
     // Generate embedding for the search query
     const queryEmbedding = await generateQueryEmbedding(query);

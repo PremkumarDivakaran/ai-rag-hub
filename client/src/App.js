@@ -48,6 +48,7 @@ import {
   ManageSearch as RetrievalIcon,
   Build as FeaturesIcon,
   SmartToy as BotIcon,
+  BugReport as BugIcon,
   ExpandLess,
   ExpandMore
 } from '@mui/icons-material';
@@ -65,6 +66,7 @@ import SummarizationDedup from './components/processing/SummarizationDedup';
 import PromptSchemaManager from './components/processing/PromptSchemaManager';
 import UserStoryRating from './components/processing/UserStoryRating';
 import TeamKnowledgeBot from './components/processing/TeamKnowledgeBot';
+import DefectIntelligence from './components/processing/DefectIntelligence';
 import Settings from './components/settings/Settings';
 
 // Enterprise color palette - Light Blue theme
@@ -315,10 +317,10 @@ const menuSections = [
     items: [
       { 
         id: 'test-generator', 
-        label: 'Test Case Generator', 
+        label: 'Test Intelligence Engine', 
         icon: <TestGeneratorIcon />, 
         component: PromptSchemaManager,
-        description: 'AI-powered test case generation from user stories'
+        description: 'AI-powered test case generation & impact analysis'
       },
       { 
         id: 'story-rating', 
@@ -333,6 +335,13 @@ const menuSections = [
         icon: <BotIcon />, 
         component: TeamKnowledgeBot,
         description: 'AI assistant for team Confluence documentation'
+      },
+      { 
+        id: 'defect-intelligence', 
+        label: 'Defect Intelligence', 
+        icon: <BugIcon />, 
+        component: DefectIntelligence,
+        description: 'Analyze defects for duplicates, patterns & root causes'
       }
     ]
   },

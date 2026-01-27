@@ -262,14 +262,14 @@ async function main() {
     const userStories = JSON.parse(fs.readFileSync(USER_STORIES_DATA_FILE, "utf-8"));
     const progress = new UserStoryProgressTracker(userStories.length);
 
-    console.log(`🚀 TESTLEAF BATCH API PROCESSING: ${userStories.length} user stories`);
-    console.log(`⚡ Using Testleaf Batch Testleaf API for Maximum Efficiency!`);
+    console.log(`🚀 BATCH API PROCESSING: ${userStories.length} user stories`);
+    console.log(`⚡ Using Batch API for Maximum Efficiency!`);
     console.log(`⚙️  Configuration for User Stories Batch API:`);
     console.log(`   📦 Batch Size: ${BATCH_SIZE} user stories per API call`);
     console.log(`   🔄 Concurrent Batch Calls: ${CONCURRENT_LIMIT}`);
     console.log(`   💾 MongoDB Batch Size: ${MONGODB_BATCH_SIZE}`);
     console.log(`   ⏰ Delay Between Batch Groups: ${DELAY_BETWEEN_BATCHES}ms`);
-    console.log(`   🌐 API Endpoint: ${LLM_API_BASE}/embedding/batch/${USER_EMAIL}`);
+    console.log(`   🌐 API Endpoint: [CONFIGURED]`);
     console.log(`   📧 User Email: ${USER_EMAIL}`);
     console.log(`   🗄️  Database: ${process.env.DB_NAME}`);
     console.log(`   📦 Collection: ${USER_STORIES_COLLECTION}`);

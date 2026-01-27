@@ -1,0 +1,158 @@
+[
+    {
+        "bug_id": "NE-1001",
+        "summary": "Policy import fails with NullPointerException",
+        "description": "While importing a YAML policy file greater than 2MB, the import fails with a NullPointerException in policy-parser service.",
+        "steps_to_reproduce": [
+            "Login to NE",
+            "Go to Policy → Import",
+            "Upload YAML file > 2MB",
+            "Click Import"
+        ],
+        "expected_result": "Policy should be imported successfully.",
+        "actual_result": "Import fails with NullPointerException.",
+        "service": "policy-parser",
+        "module": "import",
+        "environment": "SIT",
+        "error_signature": "NullPointerException at PolicyYamlMapper.java:87",
+        "status": "Done",
+        "priority": "P1",
+        "rca": "Null check missing for empty metadata block in YAML parser.",
+        "fix_summary": "Added null validation before mapping YAML metadata.",
+        "resolution_comments": [
+            "Issue occurred due to empty metadata block.",
+            "Added validation and unit tests."
+        ],
+        "created_date": "2025-10-02",
+        "resolved_date": "2025-10-05",
+        "labels": [
+            "import",
+            "null-pointer",
+            "yaml"
+        ],
+        "duplicate_of": null
+    },
+    {
+        "bug_id": "NE-1022",
+        "summary": "Importing large policy crashes UI",
+        "description": "UI becomes unresponsive and backend throws NullPointerException when importing large policy YAML.",
+        "steps_to_reproduce": [
+            "Open NE UI",
+            "Upload large YAML policy",
+            "Click Import"
+        ],
+        "expected_result": "UI should show progress and import policy.",
+        "actual_result": "UI crashes and import fails.",
+        "service": "policy-parser",
+        "module": "import",
+        "environment": "E2E",
+        "error_signature": "NullPointerException at PolicyYamlMapper.java:87",
+        "status": "Done",
+        "priority": "P1",
+        "rca": "Same null metadata issue as NE-1001.",
+        "fix_summary": "Handled empty metadata and improved payload validation.",
+        "resolution_comments": [
+            "Duplicate root cause of NE-1001.",
+            "UI crash is side effect."
+        ],
+        "created_date": "2025-10-18",
+        "resolved_date": "2025-10-20",
+        "labels": [
+            "duplicate",
+            "ui-crash",
+            "import"
+        ],
+        "duplicate_of": "NE-1001"
+    },
+    {
+        "bug_id": "NE-1087",
+        "summary": "Device onboarding fails with certificate error",
+        "description": "When onboarding a firewall device, onboarding fails with x509 certificate signed by unknown authority.",
+        "steps_to_reproduce": [
+            "Go to Devices → Add device",
+            "Provide firewall details",
+            "Click Onboard"
+        ],
+        "expected_result": "Device should be onboarded successfully.",
+        "actual_result": "Onboarding fails with certificate error.",
+        "service": "device-manager",
+        "module": "onboarding",
+        "environment": "SIT",
+        "error_signature": "x509: certificate signed by unknown authority",
+        "status": "Done",
+        "priority": "P2",
+        "rca": "Root CA was missing in device-manager trust store.",
+        "fix_summary": "Updated trust store and added validation during onboarding.",
+        "resolution_comments": [
+            "Missing root CA caused TLS handshake failure.",
+            "Updated deployment config."
+        ],
+        "created_date": "2025-11-01",
+        "resolved_date": "2025-11-03",
+        "labels": [
+            "certificate",
+            "onboarding",
+            "tls"
+        ],
+        "duplicate_of": null
+    },
+    {
+        "bug_id": "NE-1134",
+        "summary": "Policy deployment stuck in progress",
+        "description": "Policy deployment remains in IN_PROGRESS state for more than 30 minutes.",
+        "steps_to_reproduce": [
+            "Create a policy",
+            "Deploy to 5 devices",
+            "Observe deployment status"
+        ],
+        "expected_result": "Deployment should complete or fail.",
+        "actual_result": "Deployment stuck in progress.",
+        "service": "deployment-engine",
+        "module": "orchestration",
+        "environment": "E2E",
+        "error_signature": "Timeout waiting for device response",
+        "status": "Done",
+        "priority": "P1",
+        "rca": "Async worker thread was not releasing lock on timeout scenario.",
+        "fix_summary": "Fixed thread locking issue and added timeout handler.",
+        "resolution_comments": [
+            "Deadlock in async executor.",
+            "Added timeout and retry logic."
+        ],
+        "created_date": "2025-11-10",
+        "resolved_date": "2025-11-15",
+        "labels": [
+            "deployment",
+            "timeout",
+            "deadlock"
+        ],
+        "duplicate_of": null
+    },
+    {
+        "bug_id": "NE-1189",
+        "summary": "Device onboarding fails intermittently",
+        "description": "Some firewall devices fail onboarding with certificate error, works after retry.",
+        "steps_to_reproduce": [
+            "Add device",
+            "Observe onboarding failure"
+        ],
+        "expected_result": "Consistent successful onboarding.",
+        "actual_result": "Intermittent x509 certificate error.",
+        "service": "device-manager",
+        "module": "onboarding",
+        "environment": "E2E",
+        "error_signature": "x509: certificate signed by unknown authority",
+        "status": "Open",
+        "priority": "P2",
+        "rca": "",
+        "fix_summary": "",
+        "resolution_comments": [],
+        "created_date": "2026-01-05",
+        "resolved_date": null,
+        "labels": [
+            "certificate",
+            "onboarding"
+        ],
+        "duplicate_of": null
+    }
+]

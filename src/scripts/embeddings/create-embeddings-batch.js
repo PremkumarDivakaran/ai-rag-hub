@@ -223,14 +223,14 @@ async function main() {
     const testcases = JSON.parse(fs.readFileSync("src/data/testcases.json", "utf-8"));
     const progress = new ProgressTracker(testcases.length);
 
-    console.log(`🚀 TESTLEAF BATCH API PROCESSING: ${testcases.length} test cases`);
-    console.log(`⚡ Using Testleaf Batch Testleaf API for Maximum Efficiency!`);
+    console.log(`🚀 BATCH API PROCESSING: ${testcases.length} test cases`);
+    console.log(`⚡ Using Batch API for Maximum Efficiency!`);
     console.log(`⚙️  Configuration for Batch API:`);
     console.log(`   📦 Batch Size: ${BATCH_SIZE} testcases per API call`);
     console.log(`   🔄 Concurrent Batch Calls: ${CONCURRENT_LIMIT}`);
     console.log(`   💾 MongoDB Batch Size: ${MONGODB_BATCH_SIZE}`);
     console.log(`   ⏰ Delay Between Batch Groups: ${DELAY_BETWEEN_BATCHES}ms`);
-    console.log(`   🌐 API Endpoint: ${LLM_API_BASE}/embedding/batch/${USER_EMAIL}`);
+    console.log(`   🌐 API Endpoint: [CONFIGURED]`);
     console.log(`   📧 User Email: ${USER_EMAIL}`);
     console.log(`   🗄️  Database: ${process.env.DB_NAME}`);
     console.log(`   📦 Collection: ${process.env.COLLECTION_NAME}`);
