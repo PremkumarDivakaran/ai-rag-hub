@@ -37,7 +37,13 @@ import axios from 'axios';
 const API_BASE = 'http://localhost:3001/api';
 
 function QuerySearch() {
-  const [query, setQuery] = useState('Share Diagnostic Reports with Patients via WhatsApp');
+  const [query, setQuery] = useState('');
+  
+  // Quick example queries
+  const exampleQueries = [
+    "UHID patient login issue OTP not working",
+    "Add to cart checkout payment failed"
+  ];
   const [limit, setLimit] = useState(5);
   const [searching, setSearching] = useState(false);
   const [results, setResults] = useState([]);
@@ -247,8 +253,22 @@ function QuerySearch() {
                         width: '100%'
                       } 
                     }}
-                    
                   />
+                  <Box sx={{ mt: 1, display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+                    <Typography variant="caption" color="text.secondary">
+                      Quick Examples:
+                    </Typography>
+                    {exampleQueries.map((example, index) => (
+                      <Chip
+                        key={index}
+                        label={example}
+                        size="small"
+                        onClick={() => setQuery(example)}
+                        variant="outlined"
+                        sx={{ cursor: 'pointer' }}
+                      />
+                    ))}
+                  </Box>
                 </Grid>
 
                 {/* Metadata Filters Section */}

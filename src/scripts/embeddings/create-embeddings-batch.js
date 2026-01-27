@@ -27,10 +27,10 @@ const USER_EMAIL = process.env.USER_EMAIL;
 const AUTH_TOKEN = process.env.AUTH_TOKEN;
 
 // BATCH PROCESSING CONFIGURATION - Optimized for Testleaf Batch API
-const BATCH_SIZE = 100; // Send 100 batches
-const CONCURRENT_LIMIT = 5; // Max 5 concurrent batch API calls (fewer but larger requests)
-const DELAY_BETWEEN_BATCHES = 1000; // 1000ms delay between batches (batch calls take longer)
-const MONGODB_BATCH_SIZE = 200; // Insert 200 documents at once
+const BATCH_SIZE = 100; // Send 100 texts per embedding API call
+const CONCURRENT_LIMIT = 5; // Max 5 concurrent batch API calls
+const DELAY_BETWEEN_BATCHES = 500; // 500ms delay between batches
+const MONGODB_BATCH_SIZE = 100; // Insert 100 documents per MongoDB batch
 
 // Create limiters for different operations
 const embeddingLimit = pLimit(CONCURRENT_LIMIT);

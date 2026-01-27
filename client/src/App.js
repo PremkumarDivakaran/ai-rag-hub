@@ -47,6 +47,7 @@ import {
   CloudUpload as IngestionIcon,
   ManageSearch as RetrievalIcon,
   Build as FeaturesIcon,
+  SmartToy as BotIcon,
   ExpandLess,
   ExpandMore
 } from '@mui/icons-material';
@@ -63,6 +64,7 @@ import QueryPreprocessing from './components/processing/QueryPreprocessing';
 import SummarizationDedup from './components/processing/SummarizationDedup';
 import PromptSchemaManager from './components/processing/PromptSchemaManager';
 import UserStoryRating from './components/processing/UserStoryRating';
+import TeamKnowledgeBot from './components/processing/TeamKnowledgeBot';
 import Settings from './components/settings/Settings';
 
 // Enterprise color palette - Light Blue theme
@@ -324,6 +326,13 @@ const menuSections = [
         icon: <RateIcon />, 
         component: UserStoryRating,
         description: 'RAG-powered user story analysis & rating'
+      },
+      { 
+        id: 'knowledge-bot', 
+        label: 'Atlas - Knowledge Bot', 
+        icon: <BotIcon />, 
+        component: TeamKnowledgeBot,
+        description: 'AI assistant for team Confluence documentation'
       }
     ]
   },

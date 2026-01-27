@@ -211,12 +211,10 @@ function SummarizationDedup() {
     return null;
   };
 
-  // Example queries
+  // Quick example queries
   const exampleQueries = [
-    "patient login authentication",
-    "merge UHID records",
-    "appointment booking",
-    "password reset OTP"
+    "UHID patient login issue OTP not working",
+    "Add to cart checkout payment failed"
   ];
 
   return (

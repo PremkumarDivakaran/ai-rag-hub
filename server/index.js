@@ -637,7 +637,7 @@ async function processEmbeddings(jobId, files, targetCollection) {
     // Convert paths to forward slashes for cross-platform compatibility
     const filePathNormalized = filePath.replace(/\\/g, '/');
     
-    // Create a modified version of create-embeddings-store.js for this specific file
+    // Create a modified version with BATCH processing for faster insertion
     const scriptContent = `
 import { MongoClient } from "mongodb";
 import dns from "dns";
@@ -656,111 +656,239 @@ const mongoClient = new MongoClient(process.env.MONGODB_URI, {
   serverSelectionTimeoutMS: 30000,
   connectTimeoutMS: 30000,
   socketTimeoutMS: 30000,
+  maxPoolSize: 20
 });
 
 const LLM_API_BASE = process.env.LLM_API_BASE || 'https://api.testleaf.com/ai';
 const USER_EMAIL = process.env.USER_EMAIL;
 const AUTH_TOKEN = process.env.AUTH_TOKEN;
 
+// BATCH CONFIGURATION
+const EMBEDDING_BATCH_SIZE = 100; // Process 100 embeddings per API call
+const MONGODB_BATCH_SIZE = 100;   // Insert 100 documents per MongoDB batch
+const CONCURRENT_LIMIT = 5;       // Max concurrent embedding API calls
+
 // Target collection from UI selection
 const TARGET_COLLECTION = "${collectionToUse}";
 
-console.log('🔧 Embedding Script Config:');
+console.log('🔧 Batch Embedding Script Config:');
 console.log('   API Base:', LLM_API_BASE);
 console.log('   User Email:', USER_EMAIL);
 console.log('   Collection:', TARGET_COLLECTION);
+console.log('   Embedding Batch Size:', EMBEDDING_BATCH_SIZE);
+console.log('   MongoDB Batch Size:', MONGODB_BATCH_SIZE);
 
-async function main() {
+// Helper to chunk array into batches
+function chunkArray(array, size) {
+  const chunks = [];
+  for (let i = 0; i < array.length; i += size) {
+    chunks.push(array.slice(i, i + size));
+  }
+  return chunks;
+}
+
+// Generate embeddings for a batch of testcases
+async function generateBatchEmbeddings(testcaseBatch, batchNumber, totalBatches) {
+  const inputs = testcaseBatch.map(testcase => \`
+    Module: \${testcase.module || ''}
+    ID: \${testcase.id || ''}
+    Pre-Requisites: \${testcase.preRequisites || ''}
+    Title: \${testcase.title || ''}
+    Description: \${testcase.description || ''}
+    Steps: \${testcase.steps || ''}
+    Expected Result: \${testcase.expectedResults || ''}
+    Automation/Manual: \${testcase.automationManual || ''}
+    Priority: \${testcase.priority || ''}
+    Created By: \${testcase.createdBy || ''}
+    Created Date: \${testcase.createdDate || ''}
+    Last Modified Date: \${testcase.lastModifiedDate || ''}
+    Risk: \${testcase.risk || ''}
+    Version: \${testcase.version || ''}
+    Type: \${testcase.type || ''}
+  \`.trim());
+
+  console.log(\`🚀 [Batch \${batchNumber}/\${totalBatches}] Processing \${testcaseBatch.length} testcases...\`);
+
+  // Try batch API first, fallback to sequential if not available
   try {
-  await mongoClient.connect();
-  const db = mongoClient.db(process.env.DB_NAME);
-  const collection = db.collection(TARGET_COLLECTION);
-  
-  console.log(\`📦 Using collection: \${TARGET_COLLECTION}\`);
+    const embeddingResponse = await axios.post(
+      \`\${LLM_API_BASE}/embedding/batch/\${USER_EMAIL}\`,
+      { inputs: inputs, model: "text-embedding-3-small" },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          ...(AUTH_TOKEN && { 'Authorization': \`Bearer \${AUTH_TOKEN}\` })
+        },
+        timeout: 300000
+      }
+    );
 
-    const testcases = JSON.parse(fs.readFileSync("${filePathNormalized}", "utf-8"));
+    if (embeddingResponse.data.status === 200) {
+      const embeddings = embeddingResponse.data.data;
+      const totalCost = embeddingResponse.data.cost || 0;
+      const totalTokens = embeddingResponse.data.usage?.total_tokens || 0;
+      
+      console.log(\`✅ [Batch \${batchNumber}/\${totalBatches}] Success! Cost: $\${totalCost.toFixed(6)} | Tokens: \${totalTokens}\`);
+      
+      return {
+        success: true,
+        results: testcaseBatch.map((testcase, index) => ({
+          testcase,
+          embedding: embeddings[index].embedding,
+          cost: totalCost / testcaseBatch.length,
+          tokens: Math.round(totalTokens / testcaseBatch.length),
+          model: embeddingResponse.data.model
+        })),
+        totalCost,
+        totalTokens
+      };
+    }
+  } catch (batchError) {
+    console.log(\`⚠️ Batch API not available, falling back to sequential processing...\`);
+  }
 
-    console.log(\`🚀 Processing \${testcases.length} test cases from ${fileName}...\`);
-    
-    let totalCost = 0;
-    let totalTokens = 0;
-    let processed = 0;
+  // Fallback: Process sequentially if batch API fails
+  const results = [];
+  let totalCost = 0;
+  let totalTokens = 0;
 
-    for (const testcase of testcases) {
-      try {
-        const inputText = \`
-          Module: \${testcase.module}
-          ID: \${testcase.id}
-          Pre-Requisites: \${testcase.preRequisites}
-          Title: \${testcase.title}
-          Description: \${testcase.description}
-          Steps: \${testcase.steps}
-          Expected Result: \${testcase.expectedResults}
-          Automation/Manual: \${testcase.automationManual}
-          Priority: \${testcase.priority}
-          Created By: \${testcase.createdBy}
-          Created Date: \${testcase.createdDate}
-          Last Modified Date: \${testcase.lastModifiedDate}
-          Risk: \${testcase.risk}
-          Version: \${testcase.version}
-          Type: \${testcase.type}
-        \`;
-        
-        const embeddingResponse = await axios.post(
-          \`\${LLM_API_BASE}/embedding/text/\${USER_EMAIL}\`,
-          {
-            input: inputText,
-            model: "text-embedding-3-small"
-          },
-          {
-            headers: {
-              'Content-Type': 'application/json',
-              ...(AUTH_TOKEN && { 'Authorization': \`Bearer \${AUTH_TOKEN}\` })
-            }
+  for (let i = 0; i < testcaseBatch.length; i++) {
+    const testcase = testcaseBatch[i];
+    try {
+      const embeddingResponse = await axios.post(
+        \`\${LLM_API_BASE}/embedding/text/\${USER_EMAIL}\`,
+        { input: inputs[i], model: "text-embedding-3-small" },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            ...(AUTH_TOKEN && { 'Authorization': \`Bearer \${AUTH_TOKEN}\` })
           }
-        );
-
-        if (embeddingResponse.data.status !== 200) {
-          throw new Error(\`Testleaf API error: \${embeddingResponse.data.message}\`);
         }
+      );
 
-        const vector = embeddingResponse.data.data[0].embedding;
+      if (embeddingResponse.data.status === 200) {
         const cost = embeddingResponse.data.cost || 0;
         const tokens = embeddingResponse.data.usage?.total_tokens || 0;
-        
         totalCost += cost;
         totalTokens += tokens;
+        
+        results.push({
+          testcase,
+          embedding: embeddingResponse.data.data[0].embedding,
+          cost,
+          tokens,
+          model: embeddingResponse.data.model
+        });
+      }
+      
+      // Small delay between sequential calls
+      await new Promise(resolve => setTimeout(resolve, 50));
+    } catch (error) {
+      console.error(\`❌ Error processing \${testcase.id}: \${error.message}\`);
+      results.push({ testcase, error: error.message });
+    }
+  }
 
-        const doc = {
-          ...testcase,
-          embedding: vector,
-          createdAt: new Date(),
-          sourceFile: "${fileName}",
-          embeddingMetadata: {
-            model: embeddingResponse.data.model,
-            cost: cost,
-            tokens: tokens,
-            apiSource: 'testleaf'
+  console.log(\`✅ [Batch \${batchNumber}/\${totalBatches}] Sequential complete. Cost: $\${totalCost.toFixed(6)}\`);
+  return { success: true, results, totalCost, totalTokens };
+}
+
+async function main() {
+  const startTime = Date.now();
+  
+  try {
+    await mongoClient.connect();
+    const db = mongoClient.db(process.env.DB_NAME);
+    const collection = db.collection(TARGET_COLLECTION);
+    
+    console.log(\`📦 Using collection: \${TARGET_COLLECTION}\`);
+
+    const testcases = JSON.parse(fs.readFileSync("${filePathNormalized}", "utf-8"));
+    console.log(\`🚀 Processing \${testcases.length} test cases from ${fileName} using BATCH mode...\`);
+    
+    // Create batches
+    const embeddingBatches = chunkArray(testcases, EMBEDDING_BATCH_SIZE);
+    const totalBatches = embeddingBatches.length;
+    console.log(\`📦 Created \${totalBatches} batches of ~\${EMBEDDING_BATCH_SIZE} testcases each\\n\`);
+
+    let totalCost = 0;
+    let totalTokens = 0;
+    let totalInserted = 0;
+    let totalFailed = 0;
+    let documentsToInsert = [];
+
+    // Process embedding batches
+    for (let i = 0; i < embeddingBatches.length; i++) {
+      const batch = embeddingBatches[i];
+      const batchResult = await generateBatchEmbeddings(batch, i + 1, totalBatches);
+      
+      if (batchResult.success) {
+        totalCost += batchResult.totalCost;
+        totalTokens += batchResult.totalTokens;
+        
+        // Prepare documents for insertion
+        for (const item of batchResult.results) {
+          if (!item.error && item.embedding) {
+            documentsToInsert.push({
+              ...item.testcase,
+              embedding: item.embedding,
+              createdAt: new Date(),
+              sourceFile: "${fileName}",
+              embeddingMetadata: {
+                model: item.model,
+                cost: item.cost,
+                tokens: item.tokens,
+                apiSource: 'batch'
+              }
+            });
+          } else {
+            totalFailed++;
           }
-        };
-
-        await collection.insertOne(doc);
-        processed++;
+        }
         
-        console.log(\`✅ Processed \${processed}/\${testcases.length}: \${testcase.id}\`);
-        
-        await new Promise(resolve => setTimeout(resolve, 100));
-        
-      } catch (error) {
-        console.error(\`❌ Error processing \${testcase.id}: \${error.message}\`);
-        continue;
+        // Insert in batches of MONGODB_BATCH_SIZE
+        while (documentsToInsert.length >= MONGODB_BATCH_SIZE) {
+          const insertBatch = documentsToInsert.splice(0, MONGODB_BATCH_SIZE);
+          try {
+            const result = await collection.insertMany(insertBatch, { ordered: false });
+            totalInserted += result.insertedCount;
+            console.log(\`💾 Inserted batch of \${result.insertedCount} documents to MongoDB\`);
+          } catch (dbError) {
+            console.error(\`❌ MongoDB batch insert error: \${dbError.message}\`);
+            totalFailed += insertBatch.length;
+          }
+        }
+      }
+      
+      // Small delay between batches
+      if (i < embeddingBatches.length - 1) {
+        await new Promise(resolve => setTimeout(resolve, 200));
       }
     }
 
-    console.log(\`\\n🎉 Processing complete for ${fileName}!\`);
+    // Insert remaining documents
+    if (documentsToInsert.length > 0) {
+      try {
+        const result = await collection.insertMany(documentsToInsert, { ordered: false });
+        totalInserted += result.insertedCount;
+        console.log(\`💾 Inserted final batch of \${result.insertedCount} documents to MongoDB\`);
+      } catch (dbError) {
+        console.error(\`❌ MongoDB final batch insert error: \${dbError.message}\`);
+        totalFailed += documentsToInsert.length;
+      }
+    }
+
+    const totalTime = (Date.now() - startTime) / 1000;
+    const rate = testcases.length / totalTime;
+
+    console.log(\`\\n🎉 BATCH Processing complete for ${fileName}!\`);
+    console.log(\`⏱️  Total Time: \${totalTime.toFixed(1)}s\`);
+    console.log(\`⚡ Rate: \${rate.toFixed(1)} docs/sec\`);
     console.log(\`💰 Total Cost: $\${totalCost.toFixed(6)}\`);
     console.log(\`🔢 Total Tokens: \${totalTokens}\`);
-    console.log(\`📊 Processed: \${processed}/\${testcases.length}\`);
+    console.log(\`✅ Inserted: \${totalInserted}\`);
+    console.log(\`❌ Failed: \${totalFailed}\`);
+    console.log(\`📊 Success Rate: \${((totalInserted / testcases.length) * 100).toFixed(1)}%\`);
 
   } catch (err) {
     console.error("❌ Error:", err.message);
@@ -854,7 +982,7 @@ app.get('/api/env', (req, res) => {
   }
 });
 
-// Update environment variables
+// Update environment variables with dynamic reload
 app.post('/api/env', (req, res) => {
   try {
     const { envVars } = req.body;
@@ -867,7 +995,30 @@ app.post('/api/env', (req, res) => {
 
     fs.writeFileSync(envPath, envContent);
     
-    res.json({ success: true, message: 'Environment variables updated successfully' });
+    // Dynamic reload: Update process.env with new values immediately
+    // This eliminates the need for server restart
+    const previousValues = {};
+    const updatedKeys = [];
+    
+    Object.entries(envVars).forEach(([key, value]) => {
+      if (process.env[key] !== value) {
+        previousValues[key] = process.env[key];
+        process.env[key] = value;
+        updatedKeys.push(key);
+      }
+    });
+    
+    console.log('🔄 Environment variables reloaded dynamically');
+    if (updatedKeys.length > 0) {
+      console.log('📝 Updated keys:', updatedKeys.join(', '));
+    }
+    
+    res.json({ 
+      success: true, 
+      message: 'Environment variables updated and reloaded successfully',
+      reloaded: true,
+      updatedKeys: updatedKeys
+    });
   } catch (error) {
     res.status(500).json({ error: 'Failed to update environment variables', details: error.message });
   }
@@ -1377,7 +1528,7 @@ app.post('/api/search', async (req, res) => {
   const mongoClient = createMongoClient();
   
   try {
-    const { query, limit = 5, filters = {} } = req.body;
+    const { query, limit = 5, filters = {}, useConfluence = false } = req.body;
     
     if (!query) {
       return res.status(400).json({ error: 'Query is required' });
@@ -1385,13 +1536,23 @@ app.post('/api/search', async (req, res) => {
 
     await mongoClient.connect();
     
-    const validation = await validateDbCollectionIndex(mongoClient, process.env.DB_NAME, process.env.COLLECTION_NAME, process.env.VECTOR_INDEX_NAME, true);
+    // Select collection and index based on useConfluence flag
+    let collectionName, vectorIndexName;
+    if (useConfluence) {
+      collectionName = process.env.CONFLUENCE_COLLECTION_NAME || 'confluence_data';
+      vectorIndexName = process.env.CONFLUENCE_VECTOR_INDEX_NAME || 'confluence_vector_index';
+    } else {
+      collectionName = process.env.COLLECTION_NAME;
+      vectorIndexName = process.env.VECTOR_INDEX_NAME;
+    }
+    
+    const validation = await validateDbCollectionIndex(mongoClient, process.env.DB_NAME, collectionName, vectorIndexName, true);
     if (!validation.ok) {
       return res.status(400).json({ error: validation.error });
     }
 
     const db = mongoClient.db(process.env.DB_NAME);
-    const collection = db.collection(process.env.COLLECTION_NAME);
+    const collection = db.collection(collectionName);
 
     // Generate embedding for query
     const embeddingResponse = await axios.post(
@@ -1421,7 +1582,7 @@ app.post('/api/search', async (req, res) => {
           path: "embedding",
           numCandidates,
           limit: numCandidates,
-          index: process.env.VECTOR_INDEX_NAME
+          index: vectorIndexName
         }
       },
       { $addFields: { score: { $meta: "vectorSearchScore" } } }
@@ -1575,10 +1736,25 @@ app.post('/api/search/hybrid', async (req, res) => {
 
     await mongoClient.connect();
 
-    // Use different collections and indexes based on useUserStories flag
-    const collectionName = useUserStories ? process.env.USER_STORIES_COLLECTION_NAME : process.env.COLLECTION_NAME;
-    const bm25IndexName = useUserStories ? process.env.USER_STORIES_BM25_INDEX_NAME : process.env.BM25_INDEX_NAME;
-    const vectorIndexName = useUserStories ? process.env.USER_STORIES_VECTOR_INDEX_NAME : process.env.VECTOR_INDEX_NAME;
+    // Use different collections and indexes based on flags
+    let collectionName, bm25IndexName, vectorIndexName;
+    
+    if (req.body.useConfluence) {
+      // Confluence knowledge base
+      collectionName = process.env.CONFLUENCE_COLLECTION_NAME || 'confluence_data';
+      bm25IndexName = process.env.CONFLUENCE_BM25_INDEX_NAME || 'confluence_bm25_index';
+      vectorIndexName = process.env.CONFLUENCE_VECTOR_INDEX_NAME || 'confluence_vector_index';
+    } else if (useUserStories) {
+      // User stories
+      collectionName = process.env.USER_STORIES_COLLECTION_NAME;
+      bm25IndexName = process.env.USER_STORIES_BM25_INDEX_NAME;
+      vectorIndexName = process.env.USER_STORIES_VECTOR_INDEX_NAME;
+    } else {
+      // Default test cases
+      collectionName = process.env.COLLECTION_NAME;
+      bm25IndexName = process.env.BM25_INDEX_NAME;
+      vectorIndexName = process.env.VECTOR_INDEX_NAME;
+    }
 
     // Validate both indexes exist
     const bm25Validation = await validateDbCollectionIndex(
@@ -1885,10 +2061,25 @@ app.post('/api/search/rerank', async (req, res) => {
     const startTime = Date.now();
     await mongoClient.connect();
 
-    // Use different collections and indexes based on useUserStories flag
-    const collectionName = useUserStories ? process.env.USER_STORIES_COLLECTION_NAME : process.env.COLLECTION_NAME;
-    const bm25IndexName = useUserStories ? process.env.USER_STORIES_BM25_INDEX_NAME : process.env.BM25_INDEX_NAME;
-    const vectorIndexName = useUserStories ? process.env.USER_STORIES_VECTOR_INDEX_NAME : process.env.VECTOR_INDEX_NAME;
+    // Use different collections and indexes based on flags
+    let collectionName, bm25IndexName, vectorIndexName;
+    
+    if (req.body.useConfluence) {
+      // Confluence knowledge base
+      collectionName = process.env.CONFLUENCE_COLLECTION_NAME || 'confluence_data';
+      bm25IndexName = process.env.CONFLUENCE_BM25_INDEX_NAME || 'confluence_bm25_index';
+      vectorIndexName = process.env.CONFLUENCE_VECTOR_INDEX_NAME || 'confluence_vector_index';
+    } else if (useUserStories) {
+      // User stories
+      collectionName = process.env.USER_STORIES_COLLECTION_NAME;
+      bm25IndexName = process.env.USER_STORIES_BM25_INDEX_NAME;
+      vectorIndexName = process.env.VECTOR_INDEX_NAME;
+    } else {
+      // Default test cases
+      collectionName = process.env.COLLECTION_NAME;
+      bm25IndexName = process.env.BM25_INDEX_NAME;
+      vectorIndexName = process.env.VECTOR_INDEX_NAME;
+    }
 
     const db = mongoClient.db(process.env.DB_NAME);
     const collection = db.collection(collectionName);

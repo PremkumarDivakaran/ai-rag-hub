@@ -162,9 +162,19 @@ function Settings() {
     setSuccess(false);
 
     try {
-      await axios.post(`${API_BASE}/env`, { envVars });
+      const response = await axios.post(`${API_BASE}/env`, { envVars });
       setSuccess(true);
-      enqueueSnackbar('Environment variables saved successfully!', { variant: 'success' });
+      
+      // Show detailed feedback about dynamic reload
+      if (response.data.reloaded && response.data.updatedKeys?.length > 0) {
+        enqueueSnackbar(
+          `Settings saved and reloaded! Updated: ${response.data.updatedKeys.join(', ')}`, 
+          { variant: 'success', autoHideDuration: 5000 }
+        );
+      } else {
+        enqueueSnackbar('Environment variables saved successfully!', { variant: 'success' });
+      }
+      
       setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
       const errorMessage = err.response?.data?.error || 'Failed to save environment variables';
@@ -308,12 +318,12 @@ function Settings() {
         )}
       </Paper>
 
-      <Paper elevation={1} sx={{ p: 2, bgcolor: 'warning.light', color: 'warning.contrastText' }}>
+      <Paper elevation={1} sx={{ p: 2, bgcolor: 'success.light', color: 'success.contrastText' }}>
         <Typography variant="h6" gutterBottom>
-          ⚠️ Important Notes
+          ✅ Dynamic Reload Enabled
         </Typography>
         <Typography variant="body2">
-          • Changes to environment variables require a server restart to take effect.<br />
+          • Changes are applied immediately - no server restart required!<br />
           • Keep your authentication tokens secure and never share them.<br />
           • Make sure your MongoDB URI includes the correct credentials and database name.<br />
           • Test your configuration after making changes.

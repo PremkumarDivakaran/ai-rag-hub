@@ -47,7 +47,7 @@ function TabPanel({ children, value, index }) {
 }
 
 function QueryPreprocessing() {
-  const [query, setQuery] = useState('Share Diagnostic Reports with Patients via WhatsApp');
+  const [query, setQuery] = useState('');
   const [preprocessResult, setPreprocessResult] = useState(null);
   const [searchResults, setSearchResults] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -153,13 +153,10 @@ function QueryPreprocessing() {
     return 'error';
   };
 
-  // Example queries
+  // Quick example queries
   const exampleQueries = [
     "UHID patient login issue OTP not working",
-    "TC_027 merge UHID records",
-    "doctor appointment booking IP admission",
-    "password reset OTP verification",
-    "ER patient registration BP monitoring"
+    "Add to cart checkout payment failed"
   ];
 
   return (
