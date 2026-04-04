@@ -324,7 +324,7 @@ ${result.recommendations?.map((r, i) => `${i + 1}. ${r}`).join('\n') || 'N/A'}
 
       const topResults = finalResults.slice(0, 8);
 
-      // STEP 6: Summarization
+      // STEP 6: Summarization (token-aware gate)
       setCurrentStep(5);
       const resultsForSummary = topResults.slice(0, 5).map(r => ({
         bug_id: r.bug_id,
@@ -337,19 +337,41 @@ ${result.recommendations?.map((r, i) => `${i + 1}. ${r}`).join('\n') || 'N/A'}
         fix_summary: r.fix_summary,
         error_signature: r.error_signature
       }));
-      
-      const summarizeResponse = await fetch('http://localhost:3001/api/search/summarize', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          results: resultsForSummary,
-          summaryType: 'detailed'
-        })
-      });
 
-      let summaryData = { summary: 'Context from similar defects' };
-      if (summarizeResponse.ok) {
-        summaryData = await summarizeResponse.json();
+      // Rough estimate: ~4 chars/token for English text.
+      const contextTextForEstimate = resultsForSummary
+        .map((r) =>
+          `${r.bug_id || ''} ${r.summary || ''} ${r.service || ''} ${r.module || ''} ` +
+          `${r.status || ''} ${r.priority || ''} ${r.rca || ''} ${r.fix_summary || ''} ${r.error_signature || ''}`
+        )
+        .join(' ');
+      const estimatedContextTokens = Math.ceil(contextTextForEstimate.length / 4);
+      const SUMMARY_GATE_TOKENS = 450;
+
+      let summaryData = { summary: 'Context from similar defects', skipped: false };
+      if (estimatedContextTokens >= SUMMARY_GATE_TOKENS) {
+        const summarizeResponse = await fetch('http://localhost:3001/api/search/summarize', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            results: resultsForSummary,
+            summaryType: 'detailed'
+          })
+        });
+
+        if (summarizeResponse.ok) {
+          summaryData = await summarizeResponse.json();
+        }
+      } else {
+        const compact = resultsForSummary
+          .slice(0, 3)
+          .map((r, i) => `${i + 1}. ${r.bug_id || 'N/A'} | ${r.service || 'N/A'} | ${r.module || 'N/A'} | ${r.summary || 'No summary'}`)
+          .join('\n');
+        summaryData = {
+          summary: `Token-aware gate: summarization skipped (estimated ${estimatedContextTokens} tokens < ${SUMMARY_GATE_TOKENS}).\n${compact}`,
+          skipped: true,
+          estimatedContextTokens
+        };
       }
 
       // STEP 7: Analysis Generation

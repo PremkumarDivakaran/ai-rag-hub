@@ -18,8 +18,8 @@ const client = new MongoClient(process.env.MONGODB_URI, {
   socketTimeoutMS: 30000,
 });
 
-// Testleaf API configuration
-const LLM_API_BASE = process.env.LLM_API_BASE || 'https://api.testleaf.com/ai';
+// LLM API configuration
+const LLM_API_BASE = process.env.LLM_API_BASE || 'https://api.openai.com';
 const USER_EMAIL = process.env.USER_EMAIL;
 const AUTH_TOKEN = process.env.AUTH_TOKEN;
 

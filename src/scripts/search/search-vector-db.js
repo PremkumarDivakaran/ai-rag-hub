@@ -10,8 +10,8 @@ dns.setServers(['8.8.8.8', '8.8.4.4']);
 
 const client = new MongoClient(process.env.MONGODB_URI);
 
-// Testleaf API configuration
-const LLM_API_BASE = process.env.LLM_API_BASE || 'https://api.testleaf.com/ai';
+// LLM API configuration
+const LLM_API_BASE = process.env.LLM_API_BASE || 'https://api.openai.com';
 const USER_EMAIL = process.env.USER_EMAIL;
 const AUTH_TOKEN = process.env.AUTH_TOKEN; // Add your auth token if needed
 
@@ -27,7 +27,7 @@ async function main() {
     console.log(`🔎 Searching for: "${query}"`);
     console.log(`🔄 Getting embedding from LLM API...`);
 
-    // Generate embedding using Testleaf API
+    // Generate embedding using LLM API
     const embeddingResponse = await axios.post(
       `${LLM_API_BASE}/embedding/text/${USER_EMAIL}`,
       {
@@ -43,7 +43,7 @@ async function main() {
     );
 
     if (embeddingResponse.data.status !== 200) {
-      throw new Error(`Testleaf API error: ${embeddingResponse.data.message}`);
+      throw new Error(`LLM API error: ${embeddingResponse.data.message}`);
     }
 
     const queryVector = embeddingResponse.data.data[0].embedding;
@@ -83,7 +83,7 @@ async function main() {
 
   } catch (err) {
     if (err.response) {
-      console.error("❌ Testleaf API Error:", err.response.status, err.response.data);
+      console.error("❌ LLM API Error:", err.response.status, err.response.data);
     } else {
       console.error("❌ Error:", err.message);
     }

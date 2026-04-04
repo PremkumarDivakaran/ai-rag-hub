@@ -12,7 +12,7 @@ const client = new MongoClient(process.env.MONGODB_URI, {
   tlsAllowInvalidHostnames: true
 });
 
-const LLM_API_BASE = process.env.LLM_API_BASE || 'https://api.testleaf.com/ai';
+const LLM_API_BASE = process.env.LLM_API_BASE || 'https://api.openai.com';
 const USER_EMAIL = process.env.USER_EMAIL;
 const AUTH_TOKEN = process.env.AUTH_TOKEN;
 

@@ -21,8 +21,8 @@ const client = new MongoClient(process.env.MONGODB_URI, {
   maxPoolSize: 20 // Increased connection pool for batch processing
 });
 
-// Testleaf API configuration
-const LLM_API_BASE = process.env.LLM_API_BASE || 'https://api.testleaf.com/ai';
+// LLM API configuration
+const LLM_API_BASE = process.env.LLM_API_BASE || 'https://api.openai.com';
 const USER_EMAIL = process.env.USER_EMAIL;
 const AUTH_TOKEN = process.env.AUTH_TOKEN;
 
@@ -30,8 +30,8 @@ const AUTH_TOKEN = process.env.AUTH_TOKEN;
 const USER_STORIES_COLLECTION = process.env.USER_STORIES_COLLECTION || 'user_stories';
 const USER_STORIES_DATA_FILE = "src/data/stories.json";
 
-// BATCH PROCESSING CONFIGURATION - Optimized for Testleaf Batch API
-const BATCH_SIZE = 100; // Send 100 user stories per batch API call (Testleaf can handle larger batches)
+// BATCH PROCESSING CONFIGURATION - Optimized for LLM Batch API
+const BATCH_SIZE = 100; // Send 100 user stories per batch API call (LLM can handle larger batches)
 const CONCURRENT_LIMIT = 5; // Max 5 concurrent batch API calls (fewer but larger requests)
 const DELAY_BETWEEN_BATCHES = 1000; // 1000ms delay between batches (batch calls take longer)
 const MONGODB_BATCH_SIZE = 200; // Insert 200 documents at once
@@ -70,9 +70,9 @@ function createUserStoryInputText(userStory) {
 }
 
 /**
- * Generate embeddings for a batch of user stories using Testleaf Batch API
+ * Generate embeddings for a batch of user stories using LLM Batch API
  */
-async function generateBatchUserStoryTestleafs(userStoryBatch, batchNumber, totalBatches, maxRetries = 3) {
+async function generateBatchUserStoryLLMs(userStoryBatch, batchNumber, totalBatches, maxRetries = 3) {
   return embeddingLimit(async () => {
     let lastError;
     
@@ -83,7 +83,7 @@ async function generateBatchUserStoryTestleafs(userStoryBatch, batchNumber, tota
         
         console.log(`🚀 [Batch ${batchNumber}/${totalBatches}] Processing ${userStoryBatch.length} user stories...`);
         
-        // Use Testleaf Batch API endpoint
+        // Use LLM Batch API endpoint
         const embeddingResponse = await axios.post(
           `${LLM_API_BASE}/embedding/batch/${USER_EMAIL}`,
           {
@@ -119,7 +119,7 @@ async function generateBatchUserStoryTestleafs(userStoryBatch, batchNumber, tota
             model: model,
             cost: totalCost / userStoryBatch.length,
             tokens: Math.round(totalTokens / userStoryBatch.length),
-            apiSource: 'testleaf-batch',
+            apiSource: 'llm-batch',
             inputTextLength: inputs[index].length,
             batchNumber: batchNumber,
             generatedAt: new Date().toISOString()
@@ -179,7 +179,7 @@ async function insertUserStoriesBatch(collection, batch) {
         createdAt: new Date(),
         embeddingMetadata: item.metadata,
         searchableText: item.inputText,
-        lastTestleafUpdate: new Date()
+        lastLLMUpdate: new Date()
       }));
 
     if (documents.length === 0) {
@@ -306,7 +306,7 @@ async function main() {
       
       // Process multiple batches concurrently
       const batchPromises = concurrentBatches.map(batch => 
-        generateBatchUserStoryTestleafs(batch.userStories, batch.batchNumber, totalBatches)
+        generateBatchUserStoryLLMs(batch.userStories, batch.batchNumber, totalBatches)
       );
 
       const batchResults = await Promise.allSettled(batchPromises);
@@ -324,19 +324,19 @@ async function main() {
             progress.update(processedCount, result.totalCost, result.totalTokens);
 
             // Insert successful embeddings to MongoDB
-            const successfulTestleafs = result.results.filter(item => !item.error);
+            const successfulLLMs = result.results.filter(item => !item.error);
             
-            if (successfulTestleafs.length > 0) {
+            if (successfulLLMs.length > 0) {
               // Insert in sub-batches if needed
-              for (let j = 0; j < successfulTestleafs.length; j += MONGODB_BATCH_SIZE) {
-                const subBatch = successfulTestleafs.slice(j, j + MONGODB_BATCH_SIZE);
+              for (let j = 0; j < successfulLLMs.length; j += MONGODB_BATCH_SIZE) {
+                const subBatch = successfulLLMs.slice(j, j + MONGODB_BATCH_SIZE);
                 const insertResult = await insertUserStoriesBatch(collection, subBatch);
                 totalInserted += insertResult.inserted;
                 totalFailed += insertResult.failed;
               }
             }
             
-            totalFailed += (result.batchSize - successfulTestleafs.length);
+            totalFailed += (result.batchSize - successfulLLMs.length);
           } else {
             // Handle failed batch
             processedCount += result.batchSize;
@@ -384,7 +384,7 @@ async function main() {
 
   } catch (err) {
     if (err.response) {
-      console.error("❌ Testleaf API Error:", err.response.status, err.response.data);
+      console.error("❌ LLM API Error:", err.response.status, err.response.data);
     } else {
       console.error("❌ Error:", err.message);
     }

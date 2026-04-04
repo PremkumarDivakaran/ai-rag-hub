@@ -21,12 +21,12 @@ const client = new MongoClient(process.env.MONGODB_URI, {
   maxPoolSize: 20 // Increased connection pool for batch processing
 });
 
-// Testleaf API configuration
-const LLM_API_BASE = process.env.LLM_API_BASE || 'https://api.testleaf.com/ai';
+// LLM API configuration
+const LLM_API_BASE = process.env.LLM_API_BASE || 'https://api.openai.com';
 const USER_EMAIL = process.env.USER_EMAIL;
 const AUTH_TOKEN = process.env.AUTH_TOKEN;
 
-// BATCH PROCESSING CONFIGURATION - Optimized for Testleaf Batch API
+// BATCH PROCESSING CONFIGURATION - Optimized for LLM Batch API
 const BATCH_SIZE = 100; // Send 100 texts per embedding API call
 const CONCURRENT_LIMIT = 5; // Max 5 concurrent batch API calls
 const DELAY_BETWEEN_BATCHES = 500; // 500ms delay between batches
@@ -37,9 +37,9 @@ const embeddingLimit = pLimit(CONCURRENT_LIMIT);
 const dbLimit = pLimit(3); // Limit DB operations
 
 /**
- * Generate embeddings for a batch of testcases using Testleaf Batch API
+ * Generate embeddings for a batch of testcases using LLM Batch API
  */
-async function generateBatchTestleafs(testcaseBatch, batchNumber, totalBatches, maxRetries = 3) {
+async function generateBatchLLMs(testcaseBatch, batchNumber, totalBatches, maxRetries = 3) {
   return embeddingLimit(async () => {
     let lastError;
     
@@ -57,7 +57,7 @@ async function generateBatchTestleafs(testcaseBatch, batchNumber, totalBatches, 
         
         console.log(`🚀 [Batch ${batchNumber}/${totalBatches}] Processing ${testcaseBatch.length} testcases...`);
         
-        // Use Testleaf Batch API endpoint
+        // Use LLM Batch API endpoint
         const embeddingResponse = await axios.post(
           `${LLM_API_BASE}/embedding/batch/${USER_EMAIL}`,
           {
@@ -92,7 +92,7 @@ async function generateBatchTestleafs(testcaseBatch, batchNumber, totalBatches, 
             model: model,
             cost: totalCost / testcaseBatch.length,
             tokens: Math.round(totalTokens / testcaseBatch.length),
-            apiSource: 'testleaf-batch',
+            apiSource: 'llm-batch',
             batchNumber: batchNumber,
             createdAt: new Date()
           }
@@ -267,7 +267,7 @@ async function main() {
       
       // Process multiple batches concurrently
       const batchPromises = concurrentBatches.map(batch => 
-        generateBatchTestleafs(batch.testcases, batch.batchNumber, totalBatches)
+        generateBatchLLMs(batch.testcases, batch.batchNumber, totalBatches)
       );
 
       const batchResults = await Promise.allSettled(batchPromises);
@@ -285,19 +285,19 @@ async function main() {
             progress.update(processedCount, result.totalCost, result.totalTokens);
 
             // Insert successful embeddings to MongoDB
-            const successfulTestleafs = result.results.filter(item => !item.error);
+            const successfulLLMs = result.results.filter(item => !item.error);
             
-            if (successfulTestleafs.length > 0) {
+            if (successfulLLMs.length > 0) {
               // Insert in sub-batches if needed
-              for (let j = 0; j < successfulTestleafs.length; j += MONGODB_BATCH_SIZE) {
-                const subBatch = successfulTestleafs.slice(j, j + MONGODB_BATCH_SIZE);
+              for (let j = 0; j < successfulLLMs.length; j += MONGODB_BATCH_SIZE) {
+                const subBatch = successfulLLMs.slice(j, j + MONGODB_BATCH_SIZE);
                 const insertResult = await insertTestcasesBatch(collection, subBatch);
                 totalInserted += insertResult.inserted;
                 totalFailed += insertResult.failed;
               }
             }
             
-            totalFailed += (result.batchSize - successfulTestleafs.length);
+            totalFailed += (result.batchSize - successfulLLMs.length);
           } else {
             // Handle failed batch
             processedCount += result.batchSize;
@@ -337,7 +337,7 @@ async function main() {
 
   } catch (err) {
     if (err.response) {
-      console.error("❌ Testleaf API Error:", err.response.status, err.response.data);
+      console.error("❌ LLM API Error:", err.response.status, err.response.data);
     } else {
       console.error("❌ Error:", err.message);
     }

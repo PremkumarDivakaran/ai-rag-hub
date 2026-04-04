@@ -5,6 +5,33 @@
 
 import { synonymMap, phraseMap } from './dictionaries.js';
 
+function normalizeLookupToken(token) {
+  return String(token || '')
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}_-]/gu, '')
+    .trim();
+}
+
+function getLookupCandidates(token) {
+  const t = normalizeLookupToken(token);
+  if (!t) return [];
+
+  const variants = new Set([t]);
+
+  // Very light singularization for common English plural forms.
+  if (t.endsWith('ies') && t.length > 4) {
+    variants.add(`${t.slice(0, -3)}y`);
+  }
+  if (t.endsWith('es') && t.length > 3) {
+    variants.add(t.slice(0, -2));
+  }
+  if (t.endsWith('s') && t.length > 3) {
+    variants.add(t.slice(0, -1));
+  }
+
+  return Array.from(variants).filter(Boolean);
+}
+
 /**
  * Expand query with synonyms to generate multiple variations
  * @param {string} text - Input text
@@ -34,17 +61,28 @@ export function expandSynonyms(text, options = {}) {
     // Skip very short words
     if (token.length < minSynonymLength) return;
     
-    // Check if token has synonyms
-    if (allSynonyms[token]) {
+    // Check if token has synonyms (exact + normalized + simple singular forms)
+    const lookupCandidates = getLookupCandidates(token);
+    let matchedKey = null;
+    for (const key of lookupCandidates) {
+      if (allSynonyms[key]) {
+        matchedKey = key;
+        break;
+      }
+    }
+
+    if (matchedKey) {
       synonymOpportunities.push({
         position: index,
         original: token,
-        synonyms: allSynonyms[token]
+        matchedKey,
+        synonyms: allSynonyms[matchedKey]
       });
       
       mappings.push({
         term: token,
-        synonyms: allSynonyms[token],
+        matchedKey,
+        synonyms: allSynonyms[matchedKey],
         position: index
       });
     }

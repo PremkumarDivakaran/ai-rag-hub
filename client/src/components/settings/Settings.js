@@ -77,23 +77,37 @@ const envFieldsConfig = [
     multiline: false
   },
   {
-    key: 'LLM_API_BASE',
-    label: 'LLM API Base URL',
-    description: 'Base URL for LLM API service',
+    key: 'LLM_BASE_URL',
+    label: 'LLM base URL',
+    description: 'HTTP root for the provider (no trailing slash), e.g. https://api.example.com',
     sensitive: false,
     multiline: false
   },
   {
-    key: 'USER_EMAIL',
-    label: 'User Email',
-    description: 'Email address for API authentication',
+    key: 'LLM_API_KEY',
+    label: 'LLM API key',
+    description: 'Bearer token sent as Authorization',
+    sensitive: true,
+    multiline: false
+  },
+  {
+    key: 'LLM_EMBEDDING_MODEL',
+    label: 'Embedding model id',
+    description: 'Model name for POST /v1/embeddings',
+    sensitive: false,
+    multiline: false
+  },
+  {
+    key: 'LLM_CHAT_MODEL',
+    label: 'Chat model id',
+    description: 'Model name for POST /v1/chat/completions',
     sensitive: false,
     multiline: false
   },
   {
     key: 'AUTH_TOKEN',
-    label: 'Authentication Token',
-    description: 'API authentication token',
+    label: 'Auth token (legacy alias)',
+    description: 'If set and LLM_API_KEY is empty, used as the Bearer token',
     sensitive: true,
     multiline: false
   },
