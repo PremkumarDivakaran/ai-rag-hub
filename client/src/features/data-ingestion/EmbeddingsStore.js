@@ -64,6 +64,7 @@ function EmbeddingsStore() {
   const [newCollectionName, setNewCollectionName] = useState('');
   const [collectionMode, setCollectionMode] = useState('existing'); // 'existing' or 'new'
   const [loadingCollections, setLoadingCollections] = useState(false);
+  const [collectionConnectionInfo, setCollectionConnectionInfo] = useState(null);
   
   const { enqueueSnackbar } = useSnackbar();
 
@@ -88,19 +89,27 @@ function EmbeddingsStore() {
     try {
       const response = await axios.get(`${API_BASE}/collections`);
       if (response.data.success && response.data.collections) {
-        setCollections(response.data.collections);
+        const nextCollections = response.data.collections;
+        setCollections(nextCollections);
+        setCollectionConnectionInfo(response.data.connection || null);
         // Set default collection from env if available
-        if (response.data.defaultCollection) {
+        if (response.data.defaultCollection && nextCollections.some((col) => col.name === response.data.defaultCollection)) {
           setSelectedCollection(response.data.defaultCollection);
+        } else if (nextCollections.length > 0) {
+          setSelectedCollection(nextCollections[0].name);
+        } else {
+          setSelectedCollection('');
         }
       }
     } catch (err) {
-      // Silently handle - collections list not critical
       setCollections([]);
+      setSelectedCollection('');
+      setCollectionConnectionInfo(err.response?.data?.connection || null);
+      enqueueSnackbar(err.response?.data?.error || 'Failed to load collections', { variant: 'warning' });
     } finally {
       setLoadingCollections(false);
     }
-  }, []);
+  }, [enqueueSnackbar]);
 
   // Check for active jobs on component mount (handles page refresh)
   const checkForActiveJobs = useCallback(async () => {
@@ -739,6 +748,28 @@ function EmbeddingsStore() {
                         secondary={`${collections.length} collections found`} 
                       />
                     </ListItem>
+                    {collectionConnectionInfo?.host && (
+                      <ListItem>
+                        <ListItemText
+                          primary="Mongo Host"
+                          secondary={collectionConnectionInfo.host}
+                        />
+                      </ListItem>
+                    )}
+                    <ListItem>
+                      <ListItemText
+                        primary="Configured DB"
+                        secondary={collectionConnectionInfo?.configuredDatabase || 'Not configured'}
+                      />
+                    </ListItem>
+                    {collectionConnectionInfo?.uriDatabase && (
+                      <ListItem>
+                        <ListItemText
+                          primary="DB In URI"
+                          secondary={collectionConnectionInfo.uriDatabase}
+                        />
+                      </ListItem>
+                    )}
                   </List>
                 </CardContent>
               </Card>

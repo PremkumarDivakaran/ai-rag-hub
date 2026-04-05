@@ -213,6 +213,26 @@ function findLatestTestCaseIdFromLocalFiles() {
   return best;
 }
 
+function summarizeMongoConnection(uri, dbName) {
+  const summary = {
+    configuredDatabase: dbName || null,
+    uriDatabase: null,
+    host: null
+  };
+
+  try {
+    if (!uri) return summary;
+    const parsed = new URL(uri);
+    summary.host = parsed.host || null;
+    const pathname = (parsed.pathname || '').replace(/^\/+/, '').trim();
+    summary.uriDatabase = pathname || null;
+  } catch (_) {
+    // Ignore malformed URI parsing here and just omit diagnostics.
+  }
+
+  return summary;
+}
+
 // Clean up old jobs (older than 1 hour)
 setInterval(() => {
   const oneHourAgo = Date.now() - 60 * 60 * 1000;
@@ -629,6 +649,7 @@ app.get('/api/testcases/latest-id', async (req, res) => {
 // Get all collections from MongoDB
 app.get('/api/collections', async (req, res) => {
   const mongoClient = createMongoClient();
+  const connection = summarizeMongoConnection(process.env.MONGODB_URI, process.env.DB_NAME);
   
   try {
     await mongoClient.connect();
@@ -664,12 +685,17 @@ app.get('/api/collections', async (req, res) => {
       success: true,
       collections: collectionsWithCount,
       defaultCollection: process.env.COLLECTION_NAME || null,
-      database: process.env.DB_NAME
+      database: process.env.DB_NAME,
+      connection
     });
 
   } catch (error) {
     console.error('Error fetching collections:', error.message);
-    res.status(500).json({ error: 'Failed to fetch collections', details: error.message });
+    res.status(500).json({
+      error: 'Failed to fetch collections',
+      details: error.message,
+      connection
+    });
   } finally {
     await mongoClient.close().catch(() => {});
   }
