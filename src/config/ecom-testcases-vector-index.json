@@ -1,0 +1,50 @@
+{
+  "fields": [
+    {
+      "type": "vector",
+      "path": "embedding",
+      "numDimensions": 1536,
+      "similarity": "cosine"
+    },
+    {
+      "type": "filter",
+      "path": "id"
+    },
+    {
+      "type": "filter",
+      "path": "testCaseId"
+    },
+    {
+      "type": "filter",
+      "path": "module"
+    },
+    {
+      "type": "filter",
+      "path": "title"
+    },
+    {
+      "type": "filter",
+      "path": "description"
+    },
+    {
+      "type": "filter",
+      "path": "steps"
+    },
+    {
+      "type": "filter",
+      "path": "expectedResults"
+    },
+    {
+      "type": "filter",
+      "path": "priority"
+    },
+    {
+      "type": "filter",
+      "path": "risk"
+    },
+    {
+      "type": "filter",
+      "path": "sourceFile"
+    }
+  ]
+}

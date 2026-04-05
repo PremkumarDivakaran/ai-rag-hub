@@ -32,7 +32,6 @@ import {
   Assessment as AssessmentIcon,
   Stars as StarsIcon,
   AutoFixHigh as AutoFixHighIcon,
-  DataUsage as DataUsageIcon,
   Search as SearchIcon,
   FilterList as FilterListIcon,
   SmartToy as SmartToyIcon,
@@ -48,7 +47,6 @@ const UserStoryRating = () => {
   const [analysisProgress, setAnalysisProgress] = useState(0);
   const [analysisResult, setAnalysisResult] = useState(null);
   const [error, setError] = useState('');
-  const [currentAnalysisId, setCurrentAnalysisId] = useState(null);
   const [progressSteps, setProgressSteps] = useState([]);
   const [activeStep, setActiveStep] = useState(0);
 
@@ -57,7 +55,6 @@ const UserStoryRating = () => {
     return () => {
       // Clean up any ongoing intervals when component unmounts
       setIsAnalyzing(false);
-      setCurrentAnalysisId(null);
     };
   }, []);
 
@@ -115,7 +112,6 @@ Status: In Progress`;
     setAnalysisResult(null);
     setAnalysisProgress(0);
     setActiveStep(0);
-    setCurrentAnalysisId(null);
 
     // Initialize progress steps
     const initialSteps = [
@@ -576,7 +572,6 @@ IMPORTANT:
     setAnalysisResult(null);
     setError('');
     setProgressSteps([]);
-    setCurrentAnalysisId(null);
     setAnalysisProgress(0);
     setActiveStep(0);
   };

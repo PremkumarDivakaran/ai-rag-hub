@@ -16,7 +16,6 @@ import {
   Stepper,
   Step,
   StepLabel,
-  Fade,
   Collapse,
   IconButton,
   Tooltip,
@@ -28,10 +27,8 @@ import {
   alpha
 } from '@mui/material';
 import {
-  PlayArrow as SearchIcon,
   Psychology as AiIcon,
   CheckCircle as SuccessIcon,
-  Error as ErrorIcon,
   Info as InfoIcon,
   ExpandMore as ExpandIcon,
   ExpandLess as CollapseIcon,

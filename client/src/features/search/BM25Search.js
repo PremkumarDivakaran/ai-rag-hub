@@ -65,8 +65,8 @@ function BM25Search() {
       const response = await fetch(`${API_BASE}/metadata/distinct`);
       const data = await response.json();
       
-      if (data.success && data.data) {
-        setFilterOptions(data.data);
+      if (data.success && data.metadata) {
+        setFilterOptions(data.metadata);
       } else {
         // Set empty arrays if no data
         setFilterOptions({

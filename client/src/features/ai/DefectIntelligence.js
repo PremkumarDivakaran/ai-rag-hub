@@ -16,7 +16,6 @@ import {
   Stepper,
   Step,
   StepLabel,
-  Fade,
   Collapse,
   IconButton,
   Tooltip,
@@ -34,7 +33,6 @@ import {
   TableRow
 } from '@mui/material';
 import {
-  PlayArrow as SearchIcon,
   BugReport as BugIcon,
   CheckCircle as SuccessIcon,
   Info as InfoIcon,
@@ -42,12 +40,9 @@ import {
   ExpandLess as CollapseIcon,
   AutoAwesome as SparkleIcon,
   ContentCopy as CopyIcon,
-  Warning as WarningIcon,
-  Error as ErrorIcon,
   LinkOff as DuplicateIcon,
   Memory as ServiceIcon,
-  Category as ModuleIcon,
-  PriorityHigh as PriorityIcon
+  Category as ModuleIcon
 } from '@mui/icons-material';
 import { useSnackbar } from 'notistack';
 
@@ -170,7 +165,6 @@ function DefectIntelligence() {
   // View state
   const [showPipelineDetails, setShowPipelineDetails] = useState(false);
   const [showSimilarDefects, setShowSimilarDefects] = useState(false);
-  const [expandedExample, setExpandedExample] = useState(null);
   
   // Pipeline metadata
   const [pipelineData, setPipelineData] = useState(null);
@@ -493,17 +487,6 @@ Analyze the submitted defect against the similar defects found. Determine if it'
     if (event.key === 'Enter' && event.ctrlKey && !isAnalyzing) {
       event.preventDefault();
       handleAnalyze();
-    }
-  };
-
-  // Get severity color
-  const getSeverityColor = (severity) => {
-    switch (severity?.toLowerCase()) {
-      case 'critical': return 'error';
-      case 'high': return 'warning';
-      case 'medium': return 'info';
-      case 'low': return 'success';
-      default: return 'default';
     }
   };
 

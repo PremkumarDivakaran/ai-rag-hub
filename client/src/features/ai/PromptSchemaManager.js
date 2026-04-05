@@ -8,7 +8,6 @@ import {
   Grid,
   Tabs,
   Tab,
-  Divider,
   Alert,
   Card,
   CardContent,
@@ -24,7 +23,6 @@ import {
   Stepper,
   Step,
   StepLabel,
-  StepContent,
   Fade,
   Collapse,
   IconButton,
@@ -32,12 +30,9 @@ import {
   alpha
 } from '@mui/material';
 import {
-  PlayArrow as GenerateIcon,
   GetApp as ExportIcon,
-  Psychology as AiIcon,
   Search as SearchIcon,
   CheckCircle as SuccessIcon,
-  Error as ErrorIcon,
   Info as InfoIcon,
   Refresh as RefreshIcon,
   ExpandMore as ExpandIcon,

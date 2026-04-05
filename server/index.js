@@ -111,6 +111,108 @@ function getJob(jobId) {
   return jobs.get(jobId);
 }
 
+function parseTestCaseId(value) {
+  const raw = String(value || '').trim();
+  const match = raw.match(/^([A-Za-z]+)[-_ ]?(\d+)$/);
+  if (!match) return null;
+  return {
+    raw,
+    prefix: match[1].toUpperCase(),
+    number: parseInt(match[2], 10),
+    width: match[2].length
+  };
+}
+
+function buildNextTestCaseId(parsed) {
+  if (!parsed) {
+    return {
+      latestTestCaseId: null,
+      nextTestCaseId: 'TC_0001',
+      source: 'default'
+    };
+  }
+
+  const nextNumber = parsed.number + 1;
+  const width = Math.max(4, parsed.width || 4);
+  return {
+    latestTestCaseId: parsed.raw,
+    nextTestCaseId: `${parsed.prefix}_${String(nextNumber).padStart(width, '0')}`,
+    source: 'resolved'
+  };
+}
+
+async function findLatestTestCaseIdFromMongo() {
+  const collectionName = process.env.COLLECTION_NAME;
+  if (!process.env.MONGODB_URI || !process.env.DB_NAME || !collectionName) {
+    return null;
+  }
+
+  const mongoClient = createMongoClient();
+  try {
+    await mongoClient.connect();
+    const collection = mongoClient.db(process.env.DB_NAME).collection(collectionName);
+    const cursor = collection.find(
+      {},
+      {
+        projection: {
+          _id: 0,
+          id: 1,
+          testCaseId: 1
+        }
+      }
+    );
+
+    let best = null;
+    for await (const doc of cursor) {
+      const parsed = parseTestCaseId(doc?.id || doc?.testCaseId);
+      if (!parsed) continue;
+      if (
+        !best ||
+        parsed.number > best.number ||
+        (parsed.number === best.number && parsed.width > best.width)
+      ) {
+        best = parsed;
+      }
+    }
+
+    return best;
+  } finally {
+    await mongoClient.close().catch(() => {});
+  }
+}
+
+function findLatestTestCaseIdFromLocalFiles() {
+  const dataPath = path.join(__dirname, '../src/data');
+  if (!fs.existsSync(dataPath)) return null;
+
+  const files = fs.readdirSync(dataPath).filter((file) => file.endsWith('.json'));
+  let best = null;
+
+  for (const file of files) {
+    const filePath = path.join(dataPath, file);
+    try {
+      const parsedContent = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+      if (!Array.isArray(parsedContent)) continue;
+
+      for (const row of parsedContent) {
+        const parsed = parseTestCaseId(row?.id || row?.testCaseId);
+        if (!parsed) continue;
+        if (
+          !best ||
+          parsed.number > best.number ||
+          (parsed.number === best.number && parsed.width > best.width)
+        ) {
+          best = parsed;
+        }
+      }
+    } catch (_) {
+      // Ignore non-array or malformed JSON files in the data directory.
+    }
+  }
+
+  return best;
+}
+
 // Clean up old jobs (older than 1 hour)
 setInterval(() => {
   const oneHourAgo = Date.now() - 60 * 60 * 1000;
@@ -486,6 +588,41 @@ app.get('/api/files', (req, res) => {
     res.json(files);
   } catch (error) {
     res.status(500).json({ error: 'Failed to read files', details: error.message });
+  }
+});
+
+// Get the latest test case ID and next available ID for generation flows
+app.get('/api/testcases/latest-id', async (req, res) => {
+  try {
+    let latest = null;
+    let source = 'default';
+
+    try {
+      latest = await findLatestTestCaseIdFromMongo();
+      if (latest) {
+        source = 'mongodb';
+      }
+    } catch (mongoError) {
+      console.warn('⚠️ Failed to resolve latest test case ID from MongoDB:', mongoError.message);
+    }
+
+    if (!latest) {
+      latest = findLatestTestCaseIdFromLocalFiles();
+      if (latest) {
+        source = 'local-json';
+      }
+    }
+
+    const response = buildNextTestCaseId(latest);
+    res.json({
+      ...response,
+      source
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: 'Failed to determine latest test case ID',
+      details: error.message
+    });
   }
 });
 
@@ -1971,10 +2108,11 @@ app.post('/api/search', async (req, res) => {
     
     // Select collection and index based on flags
     let collectionName, vectorIndexName;
-    if (req.body.useConfluence) {
+    const useDefects = Boolean(req.body.useDefects);
+    if (useConfluence) {
       collectionName = process.env.CONFLUENCE_COLLECTION_NAME || 'confluence_data';
       vectorIndexName = process.env.CONFLUENCE_VECTOR_INDEX_NAME || 'confluence_vector_index';
-    } else if (req.body.useDefects) {
+    } else if (useDefects) {
       collectionName = process.env.DEFECT_COLLECTION_NAME || 'defect_collection';
       vectorIndexName = process.env.DEFECT_VECTOR_INDEX_NAME || 'vector_index_defect';
     } else {
@@ -1992,8 +2130,48 @@ app.post('/api/search', async (req, res) => {
 
     const { vector: queryVector, cost: embedCost, tokens: embedTokens } =
       await llmEmbeddingForQuery(query);
-    const requestedLimit = parseInt(limit);
+    const requestedLimit = Math.min(100, Math.max(1, parseInt(limit, 10) || 5));
     const numCandidates = Math.max(100, requestedLimit * 10);
+
+    const allowedFilterFields = new Set(
+      useConfluence
+        ? ['title', 'pageType', 'spaceKey', 'source']
+        : useDefects
+          ? ['bug_id', 'service', 'module', 'priority', 'status', 'environment', 'duplicate_of']
+          : ['id', 'module', 'priority', 'risk', 'automationManual', 'type', 'status']
+    );
+
+    const safeFilters = {};
+    if (filters && typeof filters === 'object' && !Array.isArray(filters)) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (!allowedFilterFields.has(key)) return;
+        if (value === '' || value === null || value === undefined) return;
+        if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+          safeFilters[key] = value;
+        }
+      });
+    }
+
+    const projectFields = useConfluence
+      ? {
+          title: 1, content: 1, text: 1, pageType: 1, link: 1,
+          source: 1, sourceFile: 1, spaceKey: 1, labels: 1,
+          createdAt: 1, updatedAt: 1, score: 1
+        }
+      : useDefects
+        ? {
+            bug_id: 1, summary: 1, description: 1, service: 1, module: 1,
+            priority: 1, status: 1, environment: 1, error_signature: 1,
+            rca: 1, fix_summary: 1, resolution_comments: 1, duplicate_of: 1,
+            labels: 1, sourceFile: 1, createdAt: 1, created_date: 1,
+            resolved_date: 1, score: 1
+          }
+        : {
+            id: 1, module: 1, preRequisites: 1, title: 1, description: 1,
+            steps: 1, expectedResults: 1, automationManual: 1, priority: 1,
+            createdBy: 1, createdDate: 1, lastModifiedDate: 1, risk: 1,
+            version: 1, type: 1, sourceFile: 1, createdAt: 1, score: 1
+          };
 
     // Build the pipeline
     const pipeline = [
@@ -2003,31 +2181,16 @@ app.post('/api/search', async (req, res) => {
           path: "embedding",
           numCandidates,
           limit: numCandidates,
-          index: vectorIndexName
+          index: vectorIndexName,
+          ...(Object.keys(safeFilters).length > 0 && { filter: safeFilters })
         }
       },
       { $addFields: { score: { $meta: "vectorSearchScore" } } }
     ];
 
-    // Apply metadata filters
-    const matchConditions = {};
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value) matchConditions[key] = value;
-    });
-    if (Object.keys(matchConditions).length > 0) {
-      pipeline.push({ $match: matchConditions });
-    }
-
     pipeline.push(
       { $limit: requestedLimit },
-      {
-        $project: {
-          id: 1, module: 1, preRequisites: 1, title: 1, description: 1,
-          steps: 1, expectedResults: 1, automationManual: 1, priority: 1,
-          createdBy: 1, createdDate: 1, lastModifiedDate: 1, risk: 1,
-          version: 1, type: 1, sourceFile: 1, createdAt: 1, score: 1
-        }
-      }
+      { $project: projectFields }
     );
 
     const results = await collection.aggregate(pipeline).toArray();
@@ -2035,7 +2198,7 @@ app.post('/api/search', async (req, res) => {
     res.json({
       success: true,
       query,
-      filters,
+      filters: safeFilters,
       results,
       cost: embedCost,
       tokens: embedTokens
